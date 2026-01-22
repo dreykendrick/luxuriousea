@@ -1,136 +1,128 @@
-import { useState } from "react";
-import { ChevronLeft, ChevronRight, Star } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const testimonials = [
   {
     id: 1,
-    name: "Alexandra M.",
+    quote: "The quality is extraordinary. Every piece feels intentional, like it was made just for me. This is what luxury should be.",
+    author: "Alexandra R.",
     location: "New York",
-    rating: 5,
-    text: "The quality is exceptional. Each piece feels like it was made with genuine care and intention. The Mindful Hoodie has become my go-to for meditation sessions and everyday wear.",
-    product: "Mindful Hoodie",
   },
   {
     id: 2,
-    name: "Marcus J.",
+    quote: "I've never felt more connected to what I wear. E & A Luxurious understands that clothing is more than fabric—it's an extension of who we are.",
+    author: "Michael T.",
     location: "Los Angeles",
-    rating: 5,
-    text: "Finally, a brand that understands that luxury isn't just about price — it's about meaning. The craftsmanship and attention to detail is unmatched.",
-    product: "Essence Premium Tee",
   },
   {
     id: 3,
-    name: "Sofia R.",
-    location: "Miami",
-    rating: 5,
-    text: "I've never felt more connected to what I wear. The philosophy behind E & A Luxurious resonates deeply. These aren't just clothes — they're reminders to be present.",
-    product: "Harmony Set",
-  },
-  {
-    id: 4,
-    name: "Daniel K.",
-    location: "Chicago",
-    rating: 5,
-    text: "The Gratitude Joggers are the most comfortable pants I've ever owned. The material is premium, and I appreciate the thoughtful design. Worth every penny.",
-    product: "Gratitude Joggers",
+    quote: "Timeless elegance with a soulful touch. The craftsmanship speaks for itself. I'm a customer for life.",
+    author: "Sarah M.",
+    location: "London",
   },
 ];
 
 export function TestimonialsSection() {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
 
-  const nextSlide = () => {
+  const goToNext = () => {
+    if (isAnimating) return;
+    setIsAnimating(true);
     setCurrentIndex((prev) => (prev + 1) % testimonials.length);
   };
 
-  const prevSlide = () => {
+  const goToPrev = () => {
+    if (isAnimating) return;
+    setIsAnimating(true);
     setCurrentIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length);
   };
 
+  useEffect(() => {
+    const timer = setTimeout(() => setIsAnimating(false), 600);
+    return () => clearTimeout(timer);
+  }, [currentIndex]);
+
+  // Auto-advance
+  useEffect(() => {
+    const interval = setInterval(goToNext, 8000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
-    <section className="py-20 lg:py-28 bg-background">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section header */}
-        <div className="text-center mb-12 lg:mb-16">
-          <p className="text-sm font-light tracking-ultra uppercase text-accent mb-2">
-            Community Voices
-          </p>
-          <h2 className="font-serif text-3xl lg:text-4xl">What Our Community Says</h2>
-        </div>
+    <section className="py-32 lg:py-44 bg-background">
+      <div className="container mx-auto px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto">
+          {/* Section header */}
+          <div className="text-center mb-16 lg:mb-20">
+            <p className="font-sans text-xs font-normal tracking-ultra uppercase text-muted-foreground mb-4">
+              Voices
+            </p>
+            <h2 className="font-serif text-4xl lg:text-5xl font-light" style={{ letterSpacing: "-0.02em" }}>
+              From Our Community
+            </h2>
+          </div>
 
-        {/* Testimonial carousel */}
-        <div className="relative max-w-4xl mx-auto">
-          {/* Navigation buttons */}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={prevSlide}
-            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 lg:-translate-x-16 z-10 hover:bg-secondary"
-          >
-            <ChevronLeft className="h-6 w-6" />
-            <span className="sr-only">Previous testimonial</span>
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={nextSlide}
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 lg:translate-x-16 z-10 hover:bg-secondary"
-          >
-            <ChevronRight className="h-6 w-6" />
-            <span className="sr-only">Next testimonial</span>
-          </Button>
-
-          {/* Testimonial content */}
-          <div className="overflow-hidden">
-            <div
-              className="flex transition-transform duration-500 ease-out"
-              style={{ transform: `translateX(-${currentIndex * 100}%)` }}
+          {/* Testimonial */}
+          <div className="relative min-h-[300px] flex items-center justify-center">
+            <div 
+              className={`text-center transition-all duration-600 ${
+                isAnimating ? "opacity-0 translate-y-4" : "opacity-100 translate-y-0"
+              }`}
+              style={{ transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)" }}
             >
-              {testimonials.map((testimonial) => (
-                <div
-                  key={testimonial.id}
-                  className="w-full flex-shrink-0 px-8 lg:px-16"
-                >
-                  <div className="text-center">
-                    {/* Stars */}
-                    <div className="flex justify-center gap-1 mb-6">
-                      {[...Array(testimonial.rating)].map((_, i) => (
-                        <Star key={i} className="h-4 w-4 fill-accent text-accent" />
-                      ))}
-                    </div>
-
-                    {/* Quote */}
-                    <blockquote className="font-serif text-xl lg:text-2xl leading-relaxed mb-8 text-foreground/90">
-                      "{testimonial.text}"
-                    </blockquote>
-
-                    {/* Author */}
-                    <div className="space-y-1">
-                      <p className="font-medium">{testimonial.name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {testimonial.location} · {testimonial.product}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))}
+              <blockquote className="font-serif text-2xl sm:text-3xl lg:text-4xl font-light leading-relaxed mb-10 italic" style={{ letterSpacing: "-0.01em" }}>
+                "{testimonials[currentIndex].quote}"
+              </blockquote>
+              <div className="space-y-1">
+                <p className="font-sans text-sm font-normal tracking-wide">
+                  {testimonials[currentIndex].author}
+                </p>
+                <p className="font-sans text-xs text-muted-foreground tracking-wide uppercase">
+                  {testimonials[currentIndex].location}
+                </p>
+              </div>
             </div>
           </div>
 
-          {/* Dots indicator */}
-          <div className="flex justify-center gap-2 mt-8">
-            {testimonials.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentIndex(index)}
-                className={`w-2 h-2 rounded-full transition-colors ${
-                  index === currentIndex ? "bg-accent" : "bg-border"
-                }`}
-              >
-                <span className="sr-only">Go to testimonial {index + 1}</span>
-              </button>
-            ))}
+          {/* Minimal navigation */}
+          <div className="flex items-center justify-center gap-8 mt-12">
+            <button
+              onClick={goToPrev}
+              className="p-3 text-muted-foreground hover:text-foreground transition-colors duration-300"
+              aria-label="Previous testimonial"
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+            
+            {/* Dots */}
+            <div className="flex gap-3">
+              {testimonials.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => {
+                    if (!isAnimating) {
+                      setIsAnimating(true);
+                      setCurrentIndex(index);
+                    }
+                  }}
+                  className={`w-2 h-2 rounded-full transition-all duration-500 ${
+                    index === currentIndex 
+                      ? "bg-foreground w-6" 
+                      : "bg-border hover:bg-muted-foreground"
+                  }`}
+                  aria-label={`Go to testimonial ${index + 1}`}
+                />
+              ))}
+            </div>
+
+            <button
+              onClick={goToNext}
+              className="p-3 text-muted-foreground hover:text-foreground transition-colors duration-300"
+              aria-label="Next testimonial"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </button>
           </div>
         </div>
       </div>
