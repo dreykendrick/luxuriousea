@@ -14,9 +14,9 @@ const productData = {
   price: 165,
   description: "Our signature hoodie, designed for those who seek comfort with intention. Crafted from premium organic cotton blend, this piece embodies the perfect balance of luxury and mindfulness.",
   images: [
-    "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800&h=1000&fit=crop",
-    "https://images.unsplash.com/photo-1578768079052-aa76e52ff62e?w=800&h=1000&fit=crop",
-    "https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=800&h=1000&fit=crop",
+    "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=1000&h=1250&fit=crop&q=90",
+    "https://images.unsplash.com/photo-1578768079052-aa76e52ff62e?w=1000&h=1250&fit=crop&q=90",
+    "https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=1000&h=1250&fit=crop&q=90",
   ],
   category: "Hoodies",
   colors: [
@@ -38,11 +38,13 @@ const productData = {
     "Stone-M": 0,
     "Stone-L": 2,
   } as Record<string, number>,
-  materials: "80% Organic Cotton, 20% Recycled Polyester",
-  care: "Machine wash cold with like colors. Tumble dry low. Do not bleach.",
-  fit: "Relaxed, oversized fit. Model is 6'1\" wearing size M.",
+  craft: {
+    fabric: "80% Organic Cotton, 20% Recycled Polyester",
+    fit: "Relaxed, oversized silhouette. Model is 6'1\" wearing size M.",
+    care: "Machine wash cold with like colors. Tumble dry low. Do not bleach.",
+  },
   meaning: "The Mindful Hoodie represents our commitment to conscious living. The subtle embroidered details are inspired by ancient symbols of inner peace, reminding you to stay present in every moment.",
-  shipping: "Free shipping on orders over $150. Estimated delivery: 3-5 business days.",
+  shipping: "Complimentary shipping on orders over $150. Estimated delivery: 3-5 business days.",
 };
 
 const ProductDetail = () => {
@@ -57,9 +59,9 @@ const ProductDetail = () => {
 
   const getStockLabel = () => {
     if (!selectedSize) return null;
-    if (currentStock === 0) return { text: "Out of Stock", color: "text-destructive" };
-    if (currentStock <= 3) return { text: `Only ${currentStock} left`, color: "text-accent" };
-    return { text: "In Stock", color: "text-green-600" };
+    if (currentStock === 0) return { text: "Currently Unavailable", subtle: true };
+    if (currentStock <= 3) return { text: `Only ${currentStock} remaining`, subtle: false };
+    return { text: "Available", subtle: true };
   };
 
   const stockLabel = getStockLabel();
@@ -70,11 +72,11 @@ const ProductDetail = () => {
       return;
     }
     if (currentStock === 0) {
-      toast.error("This item is out of stock");
+      toast.error("This item is currently unavailable");
       return;
     }
     toast.success("Added to bag", {
-      description: `${productData.name} - ${selectedColor.name} / ${selectedSize}`,
+      description: `${productData.name} — ${selectedColor.name}, ${selectedSize}`,
     });
   };
 
@@ -88,60 +90,62 @@ const ProductDetail = () => {
 
   return (
     <Layout>
-      <div className="pt-20 lg:pt-24 pb-16 lg:pb-24">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="pt-28 lg:pt-32 pb-24 lg:pb-32">
+        <div className="container mx-auto px-6 lg:px-8">
           {/* Breadcrumb */}
-          <nav className="mb-8">
-            <ol className="flex items-center gap-2 text-sm text-muted-foreground">
+          <nav className="mb-12 lg:mb-16">
+            <ol className="flex items-center gap-2 font-sans text-xs tracking-wide text-muted-foreground">
               <li>
-                <Link to="/" className="hover:text-foreground transition-colors">
+                <Link to="/" className="hover:text-foreground transition-colors duration-300">
                   Home
                 </Link>
               </li>
-              <li>/</li>
+              <li className="text-muted-foreground/50">/</li>
               <li>
-                <Link to="/shop" className="hover:text-foreground transition-colors">
+                <Link to="/shop" className="hover:text-foreground transition-colors duration-300">
                   Shop
                 </Link>
               </li>
-              <li>/</li>
+              <li className="text-muted-foreground/50">/</li>
               <li className="text-foreground">{productData.name}</li>
             </ol>
           </nav>
 
-          <div className="grid lg:grid-cols-2 gap-8 lg:gap-16">
-            {/* Image gallery */}
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-20">
+            {/* Image gallery - dominant, editorial */}
             <div className="space-y-4">
               {/* Main image */}
-              <div className="relative aspect-[3/4] bg-secondary overflow-hidden">
+              <div className="relative aspect-[4/5] bg-secondary overflow-hidden image-zoom-luxury">
                 <img
                   src={productData.images[currentImageIndex]}
                   alt={productData.name}
                   className="absolute inset-0 w-full h-full object-cover"
                 />
-                {/* Navigation arrows */}
+                {/* Minimal navigation arrows */}
                 <button
                   onClick={prevImage}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 h-10 w-10 bg-background/80 backdrop-blur-sm flex items-center justify-center hover:bg-background transition-colors"
+                  className="absolute left-6 top-1/2 -translate-y-1/2 h-12 w-12 bg-background/90 backdrop-blur-sm flex items-center justify-center hover:bg-background transition-colors duration-300"
+                  aria-label="Previous image"
                 >
                   <ChevronLeft className="h-5 w-5" />
                 </button>
                 <button
                   onClick={nextImage}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 h-10 w-10 bg-background/80 backdrop-blur-sm flex items-center justify-center hover:bg-background transition-colors"
+                  className="absolute right-6 top-1/2 -translate-y-1/2 h-12 w-12 bg-background/90 backdrop-blur-sm flex items-center justify-center hover:bg-background transition-colors duration-300"
+                  aria-label="Next image"
                 >
                   <ChevronRight className="h-5 w-5" />
                 </button>
               </div>
 
               {/* Thumbnail row */}
-              <div className="flex gap-2">
+              <div className="flex gap-3">
                 {productData.images.map((image, index) => (
                   <button
                     key={index}
                     onClick={() => setCurrentImageIndex(index)}
-                    className={`relative aspect-[3/4] w-20 overflow-hidden border-2 transition-colors ${
-                      index === currentImageIndex ? "border-foreground" : "border-transparent"
+                    className={`relative aspect-[4/5] w-20 overflow-hidden transition-opacity duration-300 ${
+                      index === currentImageIndex ? "opacity-100" : "opacity-50 hover:opacity-75"
                     }`}
                   >
                     <img
@@ -154,34 +158,39 @@ const ProductDetail = () => {
               </div>
             </div>
 
-            {/* Product info */}
-            <div className="lg:py-4">
-              <div className="mb-6">
-                <p className="text-sm text-muted-foreground tracking-widest uppercase mb-2">
+            {/* Product info - refined spacing */}
+            <div className="lg:py-8">
+              <div className="mb-10">
+                <p className="font-sans text-xs tracking-ultra uppercase text-muted-foreground mb-4">
                   {productData.category}
                 </p>
-                <h1 className="font-serif text-3xl lg:text-4xl mb-4">{productData.name}</h1>
-                <p className="text-2xl">${productData.price}</p>
+                <h1 
+                  className="font-serif text-3xl lg:text-4xl xl:text-5xl font-light mb-5"
+                  style={{ letterSpacing: "-0.02em" }}
+                >
+                  {productData.name}
+                </h1>
+                <p className="font-sans text-xl lg:text-2xl font-light">${productData.price}</p>
               </div>
 
-              <p className="text-muted-foreground leading-relaxed mb-8">
+              <p className="font-sans text-base font-light text-muted-foreground leading-relaxed mb-12">
                 {productData.description}
               </p>
 
               {/* Color selection */}
-              <div className="mb-6">
-                <label className="block text-sm font-medium mb-3">
-                  Color: <span className="font-normal text-muted-foreground">{selectedColor.name}</span>
+              <div className="mb-8">
+                <label className="block font-sans text-xs tracking-ultra uppercase text-muted-foreground mb-4">
+                  Color — {selectedColor.name}
                 </label>
                 <div className="flex gap-3">
                   {productData.colors.map((color) => (
                     <button
                       key={color.name}
                       onClick={() => setSelectedColor(color)}
-                      className={`w-10 h-10 rounded-full border-2 transition-all ${
+                      className={`w-12 h-12 rounded-full transition-all duration-300 ${
                         selectedColor.name === color.name
-                          ? "border-foreground scale-110"
-                          : "border-border hover:border-muted-foreground"
+                          ? "ring-2 ring-foreground ring-offset-4 ring-offset-background"
+                          : "hover:ring-1 hover:ring-muted-foreground hover:ring-offset-2 hover:ring-offset-background"
                       }`}
                       style={{ backgroundColor: color.value }}
                       title={color.name}
@@ -193,15 +202,17 @@ const ProductDetail = () => {
               </div>
 
               {/* Size selection */}
-              <div className="mb-6">
-                <div className="flex items-center justify-between mb-3">
-                  <label className="text-sm font-medium">Size</label>
-                  <button className="text-sm text-muted-foreground underline hover:text-foreground">
+              <div className="mb-8">
+                <div className="flex items-center justify-between mb-4">
+                  <label className="font-sans text-xs tracking-ultra uppercase text-muted-foreground">
+                    Size
+                  </label>
+                  <button className="font-sans text-xs text-muted-foreground hover:text-foreground transition-colors duration-300 underline underline-offset-4">
                     Size Guide
                   </button>
                 </div>
                 <Select value={selectedSize} onValueChange={setSelectedSize}>
-                  <SelectTrigger className="w-full">
+                  <SelectTrigger className="w-full h-14 font-sans text-sm border-border">
                     <SelectValue placeholder="Select size" />
                   </SelectTrigger>
                   <SelectContent>
@@ -213,95 +224,101 @@ const ProductDetail = () => {
                   </SelectContent>
                 </Select>
                 {stockLabel && (
-                  <p className={`text-sm mt-2 ${stockLabel.color}`}>{stockLabel.text}</p>
+                  <p className={`font-sans text-xs mt-3 ${stockLabel.subtle ? "text-muted-foreground" : "text-foreground"}`}>
+                    {stockLabel.text}
+                  </p>
                 )}
               </div>
 
               {/* Quantity */}
-              <div className="mb-8">
-                <label className="block text-sm font-medium mb-3">Quantity</label>
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center border border-border">
-                    <button
-                      onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                      className="h-10 w-10 flex items-center justify-center hover:bg-secondary transition-colors"
-                      disabled={quantity <= 1}
-                    >
-                      <Minus className="h-4 w-4" />
-                    </button>
-                    <span className="w-12 text-center">{quantity}</span>
-                    <button
-                      onClick={() => setQuantity((q) => Math.min(currentStock || 10, q + 1))}
-                      className="h-10 w-10 flex items-center justify-center hover:bg-secondary transition-colors"
-                      disabled={quantity >= currentStock && currentStock > 0}
-                    >
-                      <Plus className="h-4 w-4" />
-                    </button>
-                  </div>
+              <div className="mb-10">
+                <label className="block font-sans text-xs tracking-ultra uppercase text-muted-foreground mb-4">
+                  Quantity
+                </label>
+                <div className="inline-flex items-center border border-border">
+                  <button
+                    onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                    className="h-14 w-14 flex items-center justify-center hover:bg-secondary transition-colors duration-300"
+                    disabled={quantity <= 1}
+                  >
+                    <Minus className="h-4 w-4" />
+                  </button>
+                  <span className="w-16 text-center font-sans text-sm">{quantity}</span>
+                  <button
+                    onClick={() => setQuantity((q) => Math.min(currentStock || 10, q + 1))}
+                    className="h-14 w-14 flex items-center justify-center hover:bg-secondary transition-colors duration-300"
+                    disabled={quantity >= currentStock && currentStock > 0}
+                  >
+                    <Plus className="h-4 w-4" />
+                  </button>
                 </div>
               </div>
 
               {/* Add to bag + Wishlist */}
-              <div className="flex gap-3 mb-8">
+              <div className="flex gap-4 mb-10">
                 <Button
                   onClick={handleAddToBag}
-                  className="flex-1 h-12 bg-primary hover:bg-primary/90 text-sm tracking-widest uppercase"
+                  className="flex-1 h-14 bg-foreground hover:bg-foreground/90 text-background text-xs tracking-ultra uppercase font-sans font-normal transition-all duration-500"
                   disabled={currentStock === 0 && selectedSize !== ""}
                 >
-                  {currentStock === 0 && selectedSize !== "" ? "Out of Stock" : "Add to Bag"}
+                  {currentStock === 0 && selectedSize !== "" ? "Unavailable" : "Add to Bag"}
                 </Button>
-                <Button variant="outline" size="icon" className="h-12 w-12">
+                <Button 
+                  variant="outline" 
+                  size="icon" 
+                  className="h-14 w-14 border-border hover:bg-secondary"
+                >
                   <Heart className="h-5 w-5" />
                   <span className="sr-only">Add to wishlist</span>
                 </Button>
               </div>
 
               {/* Shipping note */}
-              <p className="text-sm text-muted-foreground border-t border-border pt-6 mb-8">
+              <p className="font-sans text-xs text-muted-foreground border-t border-border pt-8 mb-10">
                 {productData.shipping}
               </p>
 
-              {/* Product details accordion */}
+              {/* Product details accordion - editorial style */}
               <Accordion type="single" collapsible className="border-t border-border">
-                <AccordionItem value="meaning">
-                  <AccordionTrigger className="text-sm tracking-widest uppercase">
-                    The Meaning Behind This Piece
+                <AccordionItem value="meaning" className="border-b border-border">
+                  <AccordionTrigger className="font-sans text-xs tracking-ultra uppercase py-6 hover:no-underline">
+                    The Intention Behind This Piece
                   </AccordionTrigger>
                   <AccordionContent>
-                    <p className="text-muted-foreground leading-relaxed font-serif italic">
-                      {productData.meaning}
+                    <p className="font-serif text-base italic text-muted-foreground leading-relaxed pb-4">
+                      "{productData.meaning}"
                     </p>
                   </AccordionContent>
                 </AccordionItem>
-                <AccordionItem value="materials">
-                  <AccordionTrigger className="text-sm tracking-widest uppercase">
-                    Materials & Fit
+                <AccordionItem value="craft" className="border-b border-border">
+                  <AccordionTrigger className="font-sans text-xs tracking-ultra uppercase py-6 hover:no-underline">
+                    Craft & Materials
                   </AccordionTrigger>
                   <AccordionContent>
-                    <div className="space-y-3 text-muted-foreground">
-                      <p><strong>Materials:</strong> {productData.materials}</p>
-                      <p><strong>Fit:</strong> {productData.fit}</p>
+                    <div className="space-y-4 font-sans text-sm text-muted-foreground pb-4">
+                      <p><span className="text-foreground">Fabric:</span> {productData.craft.fabric}</p>
+                      <p><span className="text-foreground">Fit:</span> {productData.craft.fit}</p>
                     </div>
                   </AccordionContent>
                 </AccordionItem>
-                <AccordionItem value="care">
-                  <AccordionTrigger className="text-sm tracking-widest uppercase">
+                <AccordionItem value="care" className="border-b border-border">
+                  <AccordionTrigger className="font-sans text-xs tracking-ultra uppercase py-6 hover:no-underline">
                     Care Instructions
                   </AccordionTrigger>
                   <AccordionContent>
-                    <p className="text-muted-foreground">{productData.care}</p>
+                    <p className="font-sans text-sm text-muted-foreground pb-4">{productData.craft.care}</p>
                   </AccordionContent>
                 </AccordionItem>
-                <AccordionItem value="shipping">
-                  <AccordionTrigger className="text-sm tracking-widest uppercase">
+                <AccordionItem value="shipping" className="border-b border-border">
+                  <AccordionTrigger className="font-sans text-xs tracking-ultra uppercase py-6 hover:no-underline">
                     Shipping & Returns
                   </AccordionTrigger>
                   <AccordionContent>
-                    <div className="space-y-3 text-muted-foreground">
+                    <div className="space-y-3 font-sans text-sm text-muted-foreground pb-4">
                       <p>{productData.shipping}</p>
                       <p>
                         We accept returns within 30 days of delivery.{" "}
-                        <Link to="/shipping-returns" className="underline hover:text-foreground">
+                        <Link to="/shipping-returns" className="text-foreground underline underline-offset-4 hover:text-muted-foreground transition-colors duration-300">
                           View full policy
                         </Link>
                       </p>
@@ -313,16 +330,16 @@ const ProductDetail = () => {
           </div>
         </div>
 
-        {/* Sticky mobile add to bag */}
-        <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border p-4 lg:hidden z-40">
-          <div className="flex items-center gap-4">
-            <div className="flex-1">
-              <p className="font-medium">{productData.name}</p>
-              <p className="text-muted-foreground">${productData.price}</p>
+        {/* Sticky mobile add to bag - refined */}
+        <div className="fixed bottom-0 left-0 right-0 bg-background/98 backdrop-blur-md border-t border-border p-5 lg:hidden z-40">
+          <div className="flex items-center gap-5">
+            <div className="flex-1 min-w-0">
+              <p className="font-serif text-base font-light truncate">{productData.name}</p>
+              <p className="font-sans text-sm text-muted-foreground">${productData.price}</p>
             </div>
             <Button
               onClick={handleAddToBag}
-              className="px-8 h-12 bg-primary hover:bg-primary/90 text-sm tracking-widest uppercase"
+              className="px-8 h-14 bg-foreground hover:bg-foreground/90 text-background text-xs tracking-ultra uppercase font-sans font-normal"
               disabled={currentStock === 0 && selectedSize !== ""}
             >
               Add to Bag
