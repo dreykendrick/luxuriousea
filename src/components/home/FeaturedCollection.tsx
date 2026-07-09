@@ -1,49 +1,36 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
-
-// Sample featured products - will be replaced with real data
-const featuredProducts = [
-  {
-    id: "1",
-    name: "Serenity Oversized Tee",
-    price: 89,
-    image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800&h=1000&fit=crop&q=90",
-    slug: "serenity-oversized-tee",
-  },
-  {
-    id: "2",
-    name: "Mindful Hoodie",
-    price: 165,
-    image: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800&h=1000&fit=crop&q=90",
-    slug: "mindful-hoodie",
-  },
-  {
-    id: "3",
-    name: "Purpose Sweatshirt",
-    price: 145,
-    image: "https://images.unsplash.com/photo-1578768079052-aa76e52ff62e?w=800&h=1000&fit=crop&q=90",
-    slug: "purpose-sweatshirt",
-  },
-  {
-    id: "4",
-    name: "Gratitude Joggers",
-    price: 125,
-    image: "https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?w=800&h=1000&fit=crop&q=90",
-    slug: "gratitude-joggers",
-  },
-];
+import { fetchProducts, Product } from "@/lib/products";
 
 export function FeaturedCollection() {
+  const [products, setProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    void (async () => {
+      try {
+        const p = await fetchProducts({ featured: true });
+        setProducts(p.slice(0, 4));
+      } catch {
+        // silent
+      }
+    })();
+  }, []);
+
+  if (products.length === 0) return null;
+
   return (
     <section className="py-32 lg:py-44 bg-background">
       <div className="container mx-auto px-6 lg:px-8">
-        {/* Editorial section header */}
         <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 mb-16 lg:mb-24">
           <div>
             <p className="font-sans text-xs font-normal tracking-ultra uppercase text-muted-foreground mb-4">
               New Season
             </p>
-            <h2 className="font-serif text-4xl lg:text-5xl xl:text-6xl font-light" style={{ letterSpacing: "-0.02em" }}>
+            <h2
+              className="font-serif text-4xl lg:text-5xl xl:text-6xl font-light"
+              style={{ letterSpacing: "-0.02em" }}
+            >
               Featured
             </h2>
           </div>
@@ -56,9 +43,8 @@ export function FeaturedCollection() {
           </Link>
         </div>
 
-        {/* Refined product grid */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
-          {featuredProducts.map((product, index) => (
+          {products.map((product, index) => (
             <Link
               key={product.id}
               to={`/product/${product.slug}`}
@@ -66,18 +52,20 @@ export function FeaturedCollection() {
               style={{ animationDelay: `${index * 0.1}s` }}
             >
               <div className="relative aspect-[3/4] overflow-hidden bg-secondary mb-6 image-zoom-luxury">
-                <img
-                  src={product.image}
-                  alt={product.name}
-                  className="absolute inset-0 w-full h-full object-cover"
-                />
+                {product.product_images?.[0]?.url && (
+                  <img
+                    src={product.product_images[0].url}
+                    alt={product.name}
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
+                )}
               </div>
               <div className="space-y-2">
                 <h3 className="font-serif text-base lg:text-lg font-light group-hover:text-muted-foreground transition-colors duration-500">
                   {product.name}
                 </h3>
                 <p className="font-sans text-sm text-muted-foreground">
-                  ${product.price}
+                  ${Number(product.base_price).toFixed(0)}
                 </p>
               </div>
             </Link>

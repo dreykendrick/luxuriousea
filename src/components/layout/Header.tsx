@@ -4,6 +4,8 @@ import { ShoppingBag, User, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
+import { useCart } from "@/contexts/CartContext";
+import { useAuth } from "@/contexts/AuthContext";
 
 const navigation = [
   { name: "Shop", href: "/shop" },
@@ -16,18 +18,17 @@ export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+  const { count } = useCart();
+  const { user, isAdmin } = useAuth();
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
-
+    const handleScroll = () => setIsScrolled(window.scrollY > 50);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Determine if we're on a dark hero page
   const isHeroPage = location.pathname === "/";
+  const isDark = !isScrolled && isHeroPage;
 
   return (
     <header
@@ -42,20 +43,15 @@ export function Header() {
     >
       <nav className="container mx-auto px-6 lg:px-8">
         <div className="flex h-20 lg:h-24 items-center justify-between">
-          {/* Mobile menu */}
           <div className="lg:hidden">
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
               <SheetTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className={cn(
-                    "hover:bg-transparent",
-                    !isScrolled && isHeroPage ? "text-white" : "text-foreground"
-                  )}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={cn("hover:bg-transparent", isDark ? "text-white" : "text-foreground")}
                 >
                   <Menu className="h-5 w-5" />
-                  <span className="sr-only">Open menu</span>
                 </Button>
               </SheetTrigger>
               <SheetContent side="left" className="w-full max-w-sm border-r-0">
@@ -73,7 +69,7 @@ export function Header() {
                         key={item.name}
                         to={item.href}
                         className={cn(
-                          "font-sans text-lg font-light tracking-wide transition-colors duration-300 py-1",
+                          "font-sans text-lg font-light tracking-wide transition-colors py-1",
                           location.pathname === item.href
                             ? "text-foreground"
                             : "text-muted-foreground hover:text-foreground"
@@ -84,22 +80,32 @@ export function Header() {
                       </Link>
                     ))}
                   </div>
-                  <div className="border-t border-border pt-8">
+                  <div className="border-t border-border pt-8 space-y-4">
                     <Link
-                      to="/auth"
-                      className="flex items-center text-muted-foreground hover:text-foreground transition-colors duration-300"
+                      to={user ? "/account" : "/auth"}
+                      className="flex items-center text-muted-foreground hover:text-foreground transition-colors"
                       onClick={() => setIsOpen(false)}
                     >
                       <User className="h-5 w-5 mr-3" />
-                      <span className="font-sans text-sm tracking-wide">Sign In</span>
+                      <span className="font-sans text-sm tracking-wide">
+                        {user ? "Account" : "Sign In"}
+                      </span>
                     </Link>
+                    {isAdmin && (
+                      <Link
+                        to="/admin"
+                        className="flex items-center text-accent hover:text-accent/80 transition-colors"
+                        onClick={() => setIsOpen(false)}
+                      >
+                        <span className="font-sans text-sm tracking-wide">Admin Panel</span>
+                      </Link>
+                    )}
                   </div>
                 </div>
               </SheetContent>
             </Sheet>
           </div>
 
-          {/* Desktop navigation - Left */}
           <div className="hidden lg:flex lg:items-center lg:space-x-10">
             {navigation.slice(0, 2).map((item) => (
               <Link
@@ -108,9 +114,9 @@ export function Header() {
                 className={cn(
                   "font-sans text-xs font-normal tracking-ultra uppercase transition-colors duration-300 elegant-underline pb-0.5",
                   location.pathname === item.href
-                    ? !isScrolled && isHeroPage ? "text-white" : "text-foreground"
-                    : !isScrolled && isHeroPage 
-                      ? "text-white/70 hover:text-white" 
+                    ? (isDark ? "text-white" : "text-foreground")
+                    : isDark
+                      ? "text-white/70 hover:text-white"
                       : "text-muted-foreground hover:text-foreground"
                 )}
               >
@@ -119,18 +125,16 @@ export function Header() {
             ))}
           </div>
 
-          {/* Logo - Center */}
           <Link
             to="/"
             className={cn(
               "font-serif text-xl lg:text-2xl tracking-tight transition-colors duration-300",
-              !isScrolled && isHeroPage ? "text-white" : "text-foreground"
+              isDark ? "text-white" : "text-foreground"
             )}
           >
             E & A Luxurious
           </Link>
 
-          {/* Desktop navigation - Right */}
           <div className="hidden lg:flex lg:items-center lg:space-x-10">
             {navigation.slice(2).map((item) => (
               <Link
@@ -139,9 +143,9 @@ export function Header() {
                 className={cn(
                   "font-sans text-xs font-normal tracking-ultra uppercase transition-colors duration-300 elegant-underline pb-0.5",
                   location.pathname === item.href
-                    ? !isScrolled && isHeroPage ? "text-white" : "text-foreground"
-                    : !isScrolled && isHeroPage 
-                      ? "text-white/70 hover:text-white" 
+                    ? (isDark ? "text-white" : "text-foreground")
+                    : isDark
+                      ? "text-white/70 hover:text-white"
                       : "text-muted-foreground hover:text-foreground"
                 )}
               >
@@ -150,40 +154,35 @@ export function Header() {
             ))}
           </div>
 
-          {/* Right icons */}
           <div className="flex items-center space-x-6">
             <Link
-              to="/auth"
+              to={user ? "/account" : "/auth"}
               className={cn(
                 "hidden lg:flex transition-colors duration-300",
-                !isScrolled && isHeroPage 
-                  ? "text-white/70 hover:text-white" 
-                  : "text-muted-foreground hover:text-foreground"
+                isDark ? "text-white/70 hover:text-white" : "text-muted-foreground hover:text-foreground"
               )}
             >
               <User className="h-5 w-5" />
-              <span className="sr-only">Sign in</span>
+              <span className="sr-only">{user ? "Account" : "Sign in"}</span>
             </Link>
             <Link
               to="/cart"
               className={cn(
                 "relative transition-colors duration-300",
-                !isScrolled && isHeroPage 
-                  ? "text-white/70 hover:text-white" 
-                  : "text-muted-foreground hover:text-foreground"
+                isDark ? "text-white/70 hover:text-white" : "text-muted-foreground hover:text-foreground"
               )}
             >
               <ShoppingBag className="h-5 w-5" />
-              <span className="sr-only">Shopping bag</span>
-              {/* Cart count badge */}
-              <span className={cn(
-                "absolute -top-1.5 -right-1.5 h-4 w-4 text-[10px] font-sans font-medium flex items-center justify-center rounded-full",
-                !isScrolled && isHeroPage 
-                  ? "bg-white text-black" 
-                  : "bg-foreground text-background"
-              )}>
-                0
-              </span>
+              {count > 0 && (
+                <span
+                  className={cn(
+                    "absolute -top-1.5 -right-1.5 h-4 w-4 text-[10px] font-sans font-medium flex items-center justify-center rounded-full",
+                    isDark ? "bg-white text-black" : "bg-foreground text-background"
+                  )}
+                >
+                  {count}
+                </span>
+              )}
             </Link>
           </div>
         </div>
