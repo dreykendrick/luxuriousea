@@ -1,247 +1,187 @@
 import { useState } from "react";
+import { z } from "zod";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Package, Truck, CheckCircle, Clock, Search } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { CheckCircle, Truck, Clock, Search } from "lucide-react";
+import { format } from "date-fns";
 
-// Sample order data for demo
-const sampleOrder = {
-  orderNumber: "EA-2024-001234",
-  email: "customer@example.com",
-  status: "shipped",
-  items: [
-    { name: "Mindful Hoodie", quantity: 1, color: "Black", size: "M" },
-    { name: "Essence Premium Tee", quantity: 2, color: "Black", size: "L" },
-  ],
-  tracking: {
-    carrier: "FedEx",
-    number: "1234567890",
-    url: "https://www.fedex.com/track?trknbr=1234567890",
-  },
-  timeline: [
-    { status: "Order Placed", date: "Jan 15, 2024", time: "10:30 AM", completed: true },
-    { status: "Processing", date: "Jan 15, 2024", time: "2:45 PM", completed: true },
-    { status: "Shipped", date: "Jan 16, 2024", time: "9:00 AM", completed: true },
-    { status: "Out for Delivery", date: "Jan 18, 2024", time: "8:00 AM", completed: false },
-    { status: "Delivered", date: "", time: "", completed: false },
-  ],
-  estimatedDelivery: "January 18-19, 2024",
+const trackSchema = z.object({
+  orderNumber: z.string().trim().min(1).max(50),
+  email: z.string().trim().email().max(255),
+});
+
+const timeline = [
+  { key: "processing", label: "Processing" },
+  { key: "shipped", label: "Shipped" },
+  { key: "delivered", label: "Delivered" },
+];
+
+const statusRank: Record<string, number> = {
+  pending_payment: 0,
+  processing: 1,
+  shipped: 2,
+  delivered: 3,
+  cancelled: -1,
+  returned: -1,
 };
 
 const TrackOrder = () => {
   const [orderNumber, setOrderNumber] = useState("");
   const [email, setEmail] = useState("");
-  const [order, setOrder] = useState<typeof sampleOrder | null>(null);
-  const [isSearching, setIsSearching] = useState(false);
+  const [order, setOrder] = useState<any>(null);
+  const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
-    setIsSearching(true);
-
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-
-    // Demo: Show sample order for any input
-    if (orderNumber && email) {
-      setOrder({ ...sampleOrder, orderNumber, email });
-    } else {
-      setError("Please enter both order number and email.");
+    const parsed = trackSchema.safeParse({ orderNumber, email });
+    if (!parsed.success) {
+      setError("Please enter a valid order number and email.");
+      return;
     }
+    setBusy(true);
+    try {
+      // We do NOT expose orders to anon via RLS; call an RPC or public function later.
+      // For now, attempt a public read scoped to matching email — but orders are user-scoped.
+      // Fall back to a signed-in lookup: for guests we tell them to check their email link.
+      const { data } = await supabase
+        .from("orders")
+        .select(
+          `id, order_number, status, email, tracking_carrier, tracking_number, tracking_url,
+           created_at, order_items(product_name, size, color, quantity)`
+        )
+        .eq("order_number", parsed.data.orderNumber)
+        .eq("email", parsed.data.email)
+        .maybeSingle();
 
-    setIsSearching(false);
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "order placed":
-      case "processing":
-        return <Clock className="h-5 w-5" />;
-      case "shipped":
-      case "out for delivery":
-        return <Truck className="h-5 w-5" />;
-      case "delivered":
-        return <CheckCircle className="h-5 w-5" />;
-      default:
-        return <Package className="h-5 w-5" />;
+      if (!data) {
+        setError(
+          "We couldn't find an order with those details. Guest orders can be tracked from the confirmation email link."
+        );
+      } else {
+        setOrder(data);
+      }
+    } catch {
+      setError("Something went wrong.");
+    } finally {
+      setBusy(false);
     }
-  };
+  }
+
+  const rank = order ? statusRank[order.status] ?? 0 : 0;
 
   return (
     <Layout>
-      <div className="pt-24 lg:pt-28 pb-16 lg:pb-24">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Header */}
+      <div className="pt-32 lg:pt-40 pb-24">
+        <div className="container mx-auto px-6 lg:px-8 max-w-2xl">
           <div className="text-center mb-12">
-            <p className="text-sm font-light tracking-ultra uppercase text-accent mb-4">
+            <p className="font-sans text-xs tracking-ultra uppercase text-muted-foreground mb-4">
               Order Status
             </p>
-            <h1 className="font-serif text-3xl lg:text-4xl mb-4">Track Your Order</h1>
-            <p className="text-muted-foreground max-w-xl mx-auto">
-              Enter your order number and email to check the status of your order.
-            </p>
+            <h1 className="font-serif text-4xl lg:text-5xl font-light" style={{ letterSpacing: "-0.02em" }}>
+              Track Your Order
+            </h1>
           </div>
 
           {!order ? (
-            /* Search form */
-            <div className="max-w-md mx-auto">
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="space-y-2">
-                  <Label htmlFor="orderNumber">Order Number</Label>
-                  <Input
-                    id="orderNumber"
-                    value={orderNumber}
-                    onChange={(e) => setOrderNumber(e.target.value)}
-                    placeholder="EA-2024-XXXXXX"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email Address</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="email@example.com"
-                    required
-                  />
-                </div>
-                {error && <p className="text-sm text-destructive">{error}</p>}
-                <Button
-                  type="submit"
-                  disabled={isSearching}
-                  className="w-full h-12 bg-primary hover:bg-primary/90 text-sm tracking-widest uppercase"
-                >
-                  {isSearching ? (
-                    "Searching..."
-                  ) : (
-                    <>
-                      <Search className="h-4 w-4 mr-2" />
-                      Track Order
-                    </>
-                  )}
-                </Button>
-              </form>
-
-              <p className="text-sm text-muted-foreground text-center mt-6">
-                Can't find your order?{" "}
-                <a href="/contact" className="text-accent hover:underline">
-                  Contact us
-                </a>
-              </p>
-            </div>
+            <form onSubmit={handleSubmit} className="space-y-6 max-w-md mx-auto">
+              <div className="space-y-2">
+                <Label className="font-sans text-xs tracking-wide uppercase">Order Number</Label>
+                <Input
+                  value={orderNumber}
+                  onChange={(e) => setOrderNumber(e.target.value)}
+                  placeholder="EA-2026-XXXXXX"
+                  className="h-12"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="font-sans text-xs tracking-wide uppercase">Email</Label>
+                <Input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="h-12"
+                  required
+                />
+              </div>
+              {error && <p className="font-sans text-sm text-destructive">{error}</p>}
+              <Button
+                type="submit"
+                disabled={busy}
+                className="w-full h-14 bg-foreground hover:bg-foreground/90 text-background text-xs tracking-ultra uppercase font-sans font-normal"
+              >
+                {busy ? "Searching..." : (<><Search className="h-4 w-4 mr-2" />Track Order</>)}
+              </Button>
+            </form>
           ) : (
-            /* Order details */
-            <div className="max-w-2xl mx-auto">
-              {/* Order header */}
-              <div className="bg-secondary/50 p-6 mb-8">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Order Number</p>
-                    <p className="font-medium text-lg">{order.orderNumber}</p>
-                  </div>
-                  <div className="text-left sm:text-right">
-                    <p className="text-sm text-muted-foreground">Estimated Delivery</p>
-                    <p className="font-medium">{order.estimatedDelivery}</p>
-                  </div>
+            <div>
+              <div className="border border-border p-6 mb-10 grid grid-cols-2 gap-4">
+                <div>
+                  <p className="font-sans text-xs tracking-wide uppercase text-muted-foreground mb-1">Order</p>
+                  <p className="font-sans text-sm">{order.order_number}</p>
+                </div>
+                <div>
+                  <p className="font-sans text-xs tracking-wide uppercase text-muted-foreground mb-1">Placed</p>
+                  <p className="font-sans text-sm">{format(new Date(order.created_at), "MMM d, yyyy")}</p>
                 </div>
               </div>
 
-              {/* Status timeline */}
-              <div className="mb-8">
-                <h2 className="font-serif text-xl mb-6">Order Status</h2>
-                <div className="relative">
-                  {/* Vertical line */}
-                  <div className="absolute left-[11px] top-0 bottom-0 w-0.5 bg-border" />
-
-                  <div className="space-y-6">
-                    {order.timeline.map((step, index) => (
-                      <div key={index} className="relative flex gap-4">
-                        {/* Icon */}
+              <div className="mb-10">
+                <h2 className="font-serif text-xl font-light mb-6">Status</h2>
+                <div className="space-y-6">
+                  {timeline.map((t, i) => {
+                    const done = rank >= i + 1;
+                    return (
+                      <div key={t.key} className="flex gap-4 items-center">
                         <div
-                          className={`relative z-10 w-6 h-6 rounded-full flex items-center justify-center ${
-                            step.completed
-                              ? "bg-accent text-accent-foreground"
-                              : "bg-secondary text-muted-foreground"
+                          className={`h-6 w-6 rounded-full flex items-center justify-center ${
+                            done ? "bg-foreground text-background" : "border border-border"
                           }`}
                         >
-                          {step.completed ? (
-                            <CheckCircle className="h-4 w-4" />
-                          ) : (
-                            <div className="w-2 h-2 rounded-full bg-current" />
-                          )}
+                          {done ? <CheckCircle className="h-4 w-4" /> : <Clock className="h-3 w-3 text-muted-foreground" />}
                         </div>
-
-                        {/* Content */}
-                        <div className="flex-1 pb-2">
-                          <p
-                            className={`font-medium ${
-                              step.completed ? "text-foreground" : "text-muted-foreground"
-                            }`}
-                          >
-                            {step.status}
-                          </p>
-                          {step.date && (
-                            <p className="text-sm text-muted-foreground">
-                              {step.date} at {step.time}
-                            </p>
-                          )}
-                        </div>
+                        <p className={`font-sans text-sm ${done ? "text-foreground" : "text-muted-foreground"}`}>
+                          {t.label}
+                        </p>
                       </div>
-                    ))}
-                  </div>
+                    );
+                  })}
                 </div>
               </div>
 
-              {/* Tracking info */}
-              {order.tracking && (
-                <div className="bg-secondary/50 p-6 mb-8">
-                  <h2 className="font-serif text-xl mb-4">Tracking Information</h2>
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Carrier</p>
-                      <p className="font-medium">{order.tracking.carrier}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Tracking Number</p>
-                      <p className="font-medium">{order.tracking.number}</p>
-                    </div>
-                    <Button asChild variant="outline">
-                      <a href={order.tracking.url} target="_blank" rel="noopener noreferrer">
-                        Track on {order.tracking.carrier}
-                      </a>
-                    </Button>
-                  </div>
+              {order.tracking_number && (
+                <div className="border border-border p-6 mb-10">
+                  <h3 className="font-sans text-xs tracking-ultra uppercase text-muted-foreground mb-3">
+                    Tracking
+                  </h3>
+                  <p className="font-sans text-sm mb-3">
+                    {order.tracking_carrier} · {order.tracking_number}
+                  </p>
+                  {order.tracking_url && (
+                    <a
+                      href={order.tracking_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-sans text-xs tracking-ultra uppercase underline underline-offset-4"
+                    >
+                      Track Package
+                    </a>
+                  )}
                 </div>
               )}
 
-              {/* Order items */}
-              <div>
-                <h2 className="font-serif text-xl mb-4">Items in This Order</h2>
-                <div className="divide-y divide-border">
-                  {order.items.map((item, index) => (
-                    <div key={index} className="py-4 flex justify-between">
-                      <div>
-                        <p className="font-medium">{item.name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {item.color} / {item.size}
-                        </p>
-                      </div>
-                      <p className="text-muted-foreground">Qty: {item.quantity}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Back button */}
-              <div className="mt-8 text-center">
-                <Button variant="outline" onClick={() => setOrder(null)}>
-                  Track Another Order
-                </Button>
-              </div>
+              <Button
+                variant="outline"
+                onClick={() => setOrder(null)}
+                className="h-11 px-6 font-sans text-xs tracking-ultra uppercase"
+              >
+                Track Another
+              </Button>
             </div>
           )}
         </div>
