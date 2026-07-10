@@ -1,73 +1,38 @@
-# Welcome to your Lovable project
+# E & A Luxurious
 
-## Project info
+> Where Luxury Meets Spirituality.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+E & A Luxurious is a premium e-commerce platform offering editorial-quality apparel designed with intention, craft, and spiritual connection. Born from a shared vision between Emmanuel and Ainekisha, the brand prioritizes visual excellence, premium materials, and deep intentionality.
 
-## How can I edit this code?
+## Tech Stack
 
-There are several ways of editing your application.
+This project is built using:
+- **Vite** & **React** (with TypeScript)
+- **Tailwind CSS** (for semantic utility styling)
+- **shadcn/ui** (accessible component system)
+- **Supabase** (backend / database integration)
+- **React Query** (state management / data fetching)
 
-**Use Lovable**
+## Development Setup
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+To run this project locally, make sure you have [Node.js](https://nodejs.org/) installed, and then:
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+# 1. Install dependencies
+npm install
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# 2. Run the development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+## Production Build
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+To build the project for production:
 
-**Use GitHub Codespaces**
+```sh
+# Build application assets
+npm run build
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+# Preview production build locally
+npm run preview
+```
