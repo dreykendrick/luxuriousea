@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Trash2, Plus, ArrowLeft } from "lucide-react";
+import { Trash2, Plus, ArrowLeft, Upload, Loader2 } from "lucide-react";
 
 interface Category {
   id: string;
@@ -43,6 +43,27 @@ function slugify(s: string) {
     .replace(/-+/g, "-");
 }
 
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024; // 5MB, matches the storage bucket limit
+
+async function uploadProductImage(file: File): Promise<string> {
+  if (!file.type.startsWith("image/")) {
+    throw new Error("Please choose an image file");
+  }
+  if (file.size > MAX_IMAGE_BYTES) {
+    throw new Error("Image is larger than 5MB");
+  }
+  const ext = file.name.split(".").pop() || "jpg";
+  const path = `${crypto.randomUUID()}.${ext}`;
+
+  const { error } = await supabase.storage
+    .from("product-images")
+    .upload(path, file, { cacheControl: "3600", upsert: false });
+  if (error) throw error;
+
+  const { data } = supabase.storage.from("product-images").getPublicUrl(path);
+  return data.publicUrl;
+}
+
 const AdminProductEdit = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -68,6 +89,25 @@ const AdminProductEdit = () => {
   const [images, setImages] = useState<ImageForm[]>([]);
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
+  const [uploadingIdx, setUploadingIdx] = useState<number | null>(null);
+
+  async function handleFileSelect(idx: number, file: File | null) {
+    if (!file) return;
+    setUploadingIdx(idx);
+    try {
+      const url = await uploadProductImage(file);
+      setImages((prev) => {
+        const next = [...prev];
+        next[idx] = { ...next[idx], url };
+        return next;
+      });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Upload failed";
+      toast.error(msg);
+    } finally {
+      setUploadingIdx(null);
+    }
+  }
 
   useEffect(() => {
     void (async () => {
@@ -129,6 +169,10 @@ const AdminProductEdit = () => {
   async function handleSave() {
     if (!form.name || !form.base_price) {
       toast.error("Name and price are required");
+      return;
+    }
+    if (uploadingIdx !== null) {
+      toast.error("Please wait for the image upload to finish");
       return;
     }
     const slug = form.slug || slugify(form.name);
@@ -376,21 +420,33 @@ const AdminProductEdit = () => {
             {images.map((img, idx) =>
               img._deleted ? null : (
                 <div key={idx} className="flex gap-3 items-center">
-                  {img.url && (
-                    <div className="w-16 aspect-[3/4] bg-secondary overflow-hidden shrink-0">
+                  <div className="w-16 aspect-[3/4] bg-secondary overflow-hidden shrink-0 flex items-center justify-center">
+                    {uploadingIdx === idx ? (
+                      <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                    ) : img.url ? (
                       <img src={img.url} alt="" className="w-full h-full object-cover" />
-                    </div>
-                  )}
-                  <Input
-                    placeholder="Image URL"
-                    value={img.url}
-                    onChange={(e) => {
-                      const next = [...images];
-                      next[idx].url = e.target.value;
-                      setImages(next);
-                    }}
-                    className="flex-1 h-11"
-                  />
+                    ) : null}
+                  </div>
+                  <label className="flex-1 h-11 border border-input rounded-md flex items-center px-3 gap-2 cursor-pointer text-sm text-muted-foreground hover:bg-secondary/50 transition-colors">
+                    <Upload className="h-4 w-4 shrink-0" />
+                    <span className="truncate">
+                      {uploadingIdx === idx
+                        ? "Uploading..."
+                        : img.url
+                        ? "Replace image"
+                        : "Choose image to upload"}
+                    </span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      disabled={uploadingIdx !== null}
+                      onChange={(e) => {
+                        void handleFileSelect(idx, e.target.files?.[0] ?? null);
+                        e.target.value = "";
+                      }}
+                    />
+                  </label>
                   <Button
                     type="button"
                     variant="ghost"
