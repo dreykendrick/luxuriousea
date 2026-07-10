@@ -58,7 +58,15 @@ const Auth = () => {
       if (error) throw error;
       toast.success("New code sent");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to resend");
+      const msg = err instanceof Error ? err.message : "Failed to resend";
+      if (msg.toLowerCase().includes("rate limit") || msg.toLowerCase().includes("ratelimit")) {
+        toast.error("Email rate limit exceeded", {
+          description: "Supabase's built-in email service is limited. To bypass this, configure a custom SMTP provider or disable 'Confirm Email' in your Supabase Dashboard under Authentication -> Providers.",
+          duration: 10000,
+        });
+      } else {
+        toast.error(msg);
+      }
     } finally {
       setBusy(false);
     }
@@ -74,7 +82,7 @@ const Auth = () => {
           toast.error(parsed.error.issues[0].message);
           return;
         }
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email: parsed.data.email,
           password: parsed.data.password,
           options: {
@@ -82,10 +90,16 @@ const Auth = () => {
           },
         });
         if (error) throw error;
-        toast.success("Check your email", {
-          description: "Enter the 6-digit code we sent you.",
-        });
-        setAwaitingOtp(true);
+        
+        if (data?.session) {
+          toast.success("Account created successfully!");
+          navigate("/account");
+        } else {
+          toast.success("Check your email", {
+            description: "Enter the 6-digit code we sent you.",
+          });
+          setAwaitingOtp(true);
+        }
       } else {
         const parsed = signInSchema.safeParse(form);
         if (!parsed.success) {
@@ -102,7 +116,14 @@ const Auth = () => {
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Something went wrong";
-      toast.error(msg);
+      if (msg.toLowerCase().includes("rate limit") || msg.toLowerCase().includes("ratelimit")) {
+        toast.error("Email rate limit exceeded", {
+          description: "Supabase's built-in email service is limited. To bypass this, configure a custom SMTP provider or disable 'Confirm Email' in your Supabase Dashboard under Authentication -> Providers.",
+          duration: 10000,
+        });
+      } else {
+        toast.error(msg);
+      }
     } finally {
       setBusy(false);
     }
