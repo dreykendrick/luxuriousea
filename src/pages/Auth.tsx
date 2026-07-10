@@ -27,6 +27,15 @@ const Auth = () => {
   const [form, setForm] = useState({ email: "", password: "", fullName: "" });
   const [awaitingOtp, setAwaitingOtp] = useState(false);
   const [otp, setOtp] = useState("");
+  const [cooldown, setCooldown] = useState(0);
+
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const timer = setTimeout(() => {
+      setCooldown((c) => c - 1);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [cooldown]);
 
   useEffect(() => {
     if (!loading && user) navigate("/account", { replace: true });
@@ -57,6 +66,7 @@ const Auth = () => {
       const { error } = await supabase.auth.resend({ type: "signup", email: form.email });
       if (error) throw error;
       toast.success("New code sent");
+      setCooldown(60);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Failed to resend";
       if (msg.toLowerCase().includes("rate limit") || msg.toLowerCase().includes("ratelimit")) {
@@ -99,6 +109,7 @@ const Auth = () => {
             description: "Enter the 6-digit code we sent you.",
           });
           setAwaitingOtp(true);
+          setCooldown(60);
         }
       } else {
         const parsed = signInSchema.safeParse(form);
@@ -184,10 +195,10 @@ const Auth = () => {
                   <button
                     type="button"
                     onClick={resendOtp}
-                    disabled={busy}
-                    className="text-muted-foreground hover:text-foreground underline underline-offset-4"
+                    disabled={busy || cooldown > 0}
+                    className="text-muted-foreground hover:text-foreground underline underline-offset-4 disabled:opacity-50 disabled:no-underline"
                   >
-                    Resend code
+                    {cooldown > 0 ? `Resend in ${cooldown}s` : "Resend code"}
                   </button>
                 </div>
               </form>
