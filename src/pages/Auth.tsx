@@ -121,10 +121,56 @@ const Auth = () => {
                 className="font-serif text-4xl lg:text-5xl font-light"
                 style={{ letterSpacing: "-0.02em" }}
               >
-                {mode === "signin" ? "Welcome Back" : "Create Account"}
+                {awaitingOtp ? "Verify Email" : mode === "signin" ? "Welcome Back" : "Create Account"}
               </h1>
             </div>
 
+            {awaitingOtp ? (
+              <form onSubmit={handleVerifyOtp} className="space-y-6">
+                <p className="font-sans text-sm text-muted-foreground text-center">
+                  Enter the 6-digit code sent to <span className="text-foreground">{form.email}</span>
+                </p>
+                <div className="space-y-2">
+                  <Label htmlFor="otp" className="font-sans text-xs tracking-wide uppercase">
+                    Verification Code
+                  </Label>
+                  <Input
+                    id="otp"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    maxLength={6}
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
+                    className="h-12 text-center text-2xl tracking-[0.5em] font-serif"
+                    required
+                  />
+                </div>
+                <Button
+                  type="submit"
+                  disabled={busy || otp.length !== 6}
+                  className="w-full h-14 bg-foreground hover:bg-foreground/90 text-background text-xs tracking-ultra uppercase font-sans font-normal"
+                >
+                  {busy ? "..." : "Verify & Continue"}
+                </Button>
+                <div className="flex justify-between text-xs font-sans">
+                  <button
+                    type="button"
+                    onClick={() => { setAwaitingOtp(false); setOtp(""); }}
+                    className="text-muted-foreground hover:text-foreground underline underline-offset-4"
+                  >
+                    Use different email
+                  </button>
+                  <button
+                    type="button"
+                    onClick={resendOtp}
+                    disabled={busy}
+                    className="text-muted-foreground hover:text-foreground underline underline-offset-4"
+                  >
+                    Resend code
+                  </button>
+                </div>
+              </form>
+            ) : (
             <Tabs value={mode} onValueChange={(v) => setMode(v as "signin" | "signup")}>
               <TabsList className="grid grid-cols-2 mb-8 bg-secondary/50">
                 <TabsTrigger value="signin" className="font-sans text-xs tracking-ultra uppercase">
@@ -189,6 +235,7 @@ const Auth = () => {
                 </Button>
               </form>
             </Tabs>
+            )}
 
             <p className="text-center mt-8 font-sans text-xs text-muted-foreground">
               By continuing you agree to our{" "}
