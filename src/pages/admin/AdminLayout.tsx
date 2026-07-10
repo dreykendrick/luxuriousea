@@ -1,14 +1,17 @@
 import { useEffect } from "react";
 import { NavLink, Outlet, useLocation, useNavigate, Link } from "react-router-dom";
-import { LayoutDashboard, Package, ShoppingBag, LogOut, Home } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingBag, LogOut, Home, Tags, Users } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 
 const nav = [
   { to: "/admin", label: "Dashboard", icon: LayoutDashboard, end: true },
   { to: "/admin/products", label: "Products", icon: Package },
+  { to: "/admin/categories", label: "Categories", icon: Tags },
   { to: "/admin/orders", label: "Orders", icon: ShoppingBag },
+  { to: "/admin/customers", label: "Customers", icon: Users },
 ];
+
 
 const AdminLayout = () => {
   const { user, loading, isAdmin, signOut } = useAuth();
