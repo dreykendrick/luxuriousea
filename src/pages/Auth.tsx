@@ -48,7 +48,7 @@ const Auth = () => {
       const { error } = await supabase.auth.verifyOtp({
         email: form.email,
         token: otp.trim(),
-        type: "signup",
+        type: "email",
       });
       if (error) throw error;
       toast.success("Email verified");
