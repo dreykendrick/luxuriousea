@@ -59,7 +59,7 @@ const About = () => {
               </div>
               <div className="order-1 lg:order-2 relative aspect-[4/5]">
                 <img
-                  src="https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?w=800&h=1000&fit=crop"
+                  src="https://ibb.co/tT4S1ZD3&fit=crop"
                   alt="Founders Emmanuel and Ainekisha"
                   className="w-full h-full object-cover"
                 />
