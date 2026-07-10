@@ -25,10 +25,44 @@ const Auth = () => {
   const [busy, setBusy] = useState(false);
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [form, setForm] = useState({ email: "", password: "", fullName: "" });
+  const [awaitingOtp, setAwaitingOtp] = useState(false);
+  const [otp, setOtp] = useState("");
 
   useEffect(() => {
     if (!loading && user) navigate("/account", { replace: true });
   }, [user, loading, navigate]);
+
+  async function handleVerifyOtp(e: React.FormEvent) {
+    e.preventDefault();
+    setBusy(true);
+    try {
+      const { error } = await supabase.auth.verifyOtp({
+        email: form.email,
+        token: otp.trim(),
+        type: "signup",
+      });
+      if (error) throw error;
+      toast.success("Email verified");
+      navigate("/account");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Invalid code");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function resendOtp() {
+    setBusy(true);
+    try {
+      const { error } = await supabase.auth.resend({ type: "signup", email: form.email });
+      if (error) throw error;
+      toast.success("New code sent");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to resend");
+    } finally {
+      setBusy(false);
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -44,15 +78,14 @@ const Auth = () => {
           email: parsed.data.email,
           password: parsed.data.password,
           options: {
-            emailRedirectTo: `${window.location.origin}/account`,
             data: { full_name: parsed.data.fullName },
           },
         });
         if (error) throw error;
-        toast.success("Account created", {
-          description: "Check your email to confirm, then sign in.",
+        toast.success("Check your email", {
+          description: "Enter the 6-digit code we sent you.",
         });
-        setMode("signin");
+        setAwaitingOtp(true);
       } else {
         const parsed = signInSchema.safeParse(form);
         if (!parsed.success) {
