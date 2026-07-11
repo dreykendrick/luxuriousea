@@ -1,8 +1,12 @@
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
-import philosophyImage from "@/assets/bonabana-wise-child-set.png.asset.json";
+import { useSiteImage } from "@/lib/siteImages";
+
+const DEFAULT_EDITORIAL_IMAGE =
+  "https://images.unsplash.com/photo-1558171813-4c088753af8f?w=900&h=1125&fit=crop&q=90";
 
 export function EditorialSection() {
+  const editorialImage = useSiteImage("editorial_section", DEFAULT_EDITORIAL_IMAGE);
   return (
     <section className="py-32 lg:py-44 bg-primary text-primary-foreground overflow-hidden">
       <div className="container mx-auto px-6 lg:px-8">
@@ -11,7 +15,7 @@ export function EditorialSection() {
           <div className="relative">
             <div className="aspect-[4/5] overflow-hidden image-zoom-luxury">
               <img
-                src={philosophyImage.url}
+                src={editorialImage}
                 alt="The meaning behind the collection"
                 className="w-full h-full object-cover"
               />
@@ -19,7 +23,6 @@ export function EditorialSection() {
             {/* Decorative line */}
             <div className="hidden lg:block absolute -right-12 top-1/2 -translate-y-1/2 w-24 h-px bg-primary-foreground/20" />
           </div>
-
           {/* Editorial content */}
           <div className="lg:py-12">
             <p className="font-sans text-xs font-normal tracking-ultra uppercase text-primary-foreground/60 mb-6">
