@@ -9,9 +9,9 @@ export function HeroSection() {
       {/* Full-bleed background image */}
       <div className="absolute inset-0">
         <img
-          src="https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=1920&h=1280&fit=crop&q=90"
+          src={heroImage.url}
           alt="E and A Luxurious - Where Luxury Meets Spirituality"
-          className="absolute inset-0 w-full h-full object-cover animate-editorial-scale"
+          className="absolute inset-0 w-full h-full object-cover object-center animate-editorial-scale"
         />
         {/* Cinematic gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/60" />
