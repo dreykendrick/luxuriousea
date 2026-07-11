@@ -111,7 +111,7 @@ const AdminOrderDetail = () => {
                 <div key={i.id} className="py-4 flex gap-4">
                   {i.image_url && (
                     <div className="w-16 aspect-[3/4] bg-secondary overflow-hidden shrink-0">
-                      <img src={i.image_url} alt="" className="w-full h-full object-cover" />
+                      <img src={i.image_url} alt="" className="w-full h-full object-contain" />
                     </div>
                   )}
                   <div className="flex-1">

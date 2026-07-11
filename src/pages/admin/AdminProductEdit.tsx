@@ -424,7 +424,7 @@ const AdminProductEdit = () => {
                     {uploadingIdx === idx ? (
                       <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                     ) : img.url ? (
-                      <img src={img.url} alt="" className="w-full h-full object-cover" />
+                      <img src={img.url} alt="" className="w-full h-full object-contain" />
                     ) : null}
                   </div>
                   <label className="flex-1 h-11 border border-input rounded-md flex items-center px-3 gap-2 cursor-pointer text-sm text-muted-foreground hover:bg-secondary/50 transition-colors">

@@ -82,7 +82,7 @@ const Cart = () => {
                       className="w-24 lg:w-32 aspect-[3/4] bg-secondary overflow-hidden shrink-0"
                     >
                       {i.image && (
-                        <img src={i.image} alt={i.productName} className="w-full h-full object-cover" />
+                        <img src={i.image} alt={i.productName} className="w-full h-full object-contain" />
                       )}
                     </Link>
                     <div className="flex-1 min-w-0">

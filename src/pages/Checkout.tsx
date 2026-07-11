@@ -256,7 +256,7 @@ const Checkout = () => {
                           <img
                             src={i.image}
                             alt={i.productName}
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-contain"
                           />
                         </div>
                       )}

@@ -112,7 +112,7 @@ const AdminProducts = () => {
                   <div className="col-span-12 md:col-span-5 flex items-center gap-3 min-w-0">
                     {p.product_images[0] ? (
                       <div className="w-12 aspect-[3/4] bg-secondary overflow-hidden shrink-0">
-                        <img src={p.product_images[0].url} alt="" className="w-full h-full object-cover" />
+                        <img src={p.product_images[0].url} alt="" className="w-full h-full object-contain" />
                       </div>
                     ) : (
                       <div className="w-12 aspect-[3/4] bg-secondary shrink-0" />
