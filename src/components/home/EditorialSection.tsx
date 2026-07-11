@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
+import philosophyImage from "@/assets/bonabana-wise-child-set.png.asset.json";
 
 export function EditorialSection() {
   return (
@@ -10,7 +11,7 @@ export function EditorialSection() {
           <div className="relative">
             <div className="aspect-[4/5] overflow-hidden image-zoom-luxury">
               <img
-                src="https://images.unsplash.com/photo-1558171813-4c088753af8f?w=900&h=1125&fit=crop&q=90"
+                src={philosophyImage.url}
                 alt="The meaning behind the collection"
                 className="w-full h-full object-cover"
               />
