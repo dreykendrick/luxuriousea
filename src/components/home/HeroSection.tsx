@@ -7,11 +7,11 @@ export function HeroSection() {
   return (
     <section className="relative min-h-[100svh] flex items-center justify-center overflow-hidden">
       {/* Full-bleed background image */}
-      <div className="absolute inset-0">
+      <div className="absolute inset-0 bg-black">
         <img
           src={heroImage.url}
           alt="E and A Luxurious - Where Luxury Meets Spirituality"
-          className="absolute inset-0 w-full h-full object-cover object-top animate-editorial-scale"
+          className="absolute inset-0 w-full h-full object-contain object-center animate-editorial-scale"
         />
         {/* Cinematic gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/60" />
