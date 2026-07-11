@@ -2,6 +2,7 @@ import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import foundersImage from "@/assets/founders-couple.jpeg.asset.json";
 
 const About = () => {
   return (
@@ -57,9 +58,9 @@ const About = () => {
                   </p>
                 </div>
               </div>
-              <div className="order-1 lg:order-2 relative aspect-[4/5]">
+              <div className="order-1 lg:order-2 relative aspect-[4/5] overflow-hidden">
                 <img
-                  src="https://ibb.co/tT4S1ZD3&fit=crop"
+                  src={foundersImage.url}
                   alt="Founders Emmanuel and Ainekisha"
                   className="w-full h-full object-cover"
                 />
