@@ -1,15 +1,19 @@
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import heroImage from "@/assets/hero-bonabana.png.asset.json";
+import { useSiteImage } from "@/lib/siteImages";
+
+const DEFAULT_HERO_IMAGE =
+  "https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=1920&h=1280&fit=crop&q=90";
 
 export function HeroSection() {
+  const heroImage = useSiteImage("home_hero", DEFAULT_HERO_IMAGE);
   return (
     <section className="relative min-h-[100svh] flex items-center justify-center overflow-hidden">
       {/* Full-bleed background image */}
       <div className="absolute inset-0 bg-black">
         <img
-          src={heroImage.url}
+          src={heroImage}
           alt="E and A Luxurious - Where Luxury Meets Spirituality"
           className="absolute inset-0 w-full h-full object-contain object-center animate-editorial-scale"
         />
@@ -18,7 +22,6 @@ export function HeroSection() {
         {/* Subtle grain texture */}
         <div className="absolute inset-0 grain-overlay" />
       </div>
-
       {/* Content */}
       <div className="relative z-10 container mx-auto px-6 lg:px-8 text-center">
         <div className="max-w-4xl mx-auto">
@@ -29,7 +32,6 @@ export function HeroSection() {
           >
             Est. 2024
           </p>
-
           {/* Main headline - Large editorial serif */}
           <h1 
             className="font-serif text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-light text-white leading-[0.9] mb-10 animate-editorial-fade-up"
@@ -39,7 +41,6 @@ export function HeroSection() {
             <br />
             <span className="italic">Meets Spirituality</span>
           </h1>
-
           {/* Single CTA */}
           <div 
             className="animate-editorial-fade-up" 
@@ -58,7 +59,6 @@ export function HeroSection() {
           </div>
         </div>
       </div>
-
       {/* Elegant scroll indicator */}
       <div className="absolute bottom-12 left-1/2 -translate-x-1/2 animate-subtle-float z-10">
         <div className="flex flex-col items-center gap-3">
