@@ -96,16 +96,26 @@ export async function uploadSiteImage(key: string, file: File): Promise<string> 
 /**
  * Fetches the current URL for a site image slot, falling back to a default
  * (e.g. the existing hardcoded/placeholder image) until an admin uploads one.
+ *
+ * Results are cached in sessionStorage so the correct image is shown instantly
+ * on every page visit within the same browser session — no flash of the old
+ * fallback while the DB fetch is in flight.
  */
 export function useSiteImage(key: string, fallback: string): string {
-  const [url, setUrl] = useState(fallback);
+  const cacheKey = `site_image_${key}`;
+  const cached = sessionStorage.getItem(cacheKey);
+
+  const [url, setUrl] = useState<string>(cached ?? fallback);
 
   useEffect(() => {
     let cancelled = false;
     void (async () => {
       try {
         const found = await fetchSiteImage(key);
-        if (!cancelled && found) setUrl(found);
+        if (!cancelled && found) {
+          sessionStorage.setItem(cacheKey, found);
+          setUrl(found);
+        }
       } catch {
         // keep fallback silently
       }
@@ -113,7 +123,7 @@ export function useSiteImage(key: string, fallback: string): string {
     return () => {
       cancelled = true;
     };
-  }, [key]);
+  }, [key, cacheKey]);
 
   return url;
 }

@@ -1,15 +1,17 @@
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useSiteImage } from "@/lib/siteImages";
 import heroImage from "@/assets/hero-bonabana.png.asset.json";
 
 export function HeroSection() {
+  const imgUrl = useSiteImage("home_hero", heroImage.url);
   return (
     <section className="relative min-h-[100svh] flex items-center justify-center overflow-hidden">
       {/* Full-bleed background image */}
       <div className="absolute inset-0 bg-black">
         <img
-          src={heroImage.url}
+          src={imgUrl}
           alt="E and A Luxurious - Where Luxury Meets Spirituality"
           className="absolute inset-0 w-full h-full object-contain object-center animate-editorial-scale"
         />
