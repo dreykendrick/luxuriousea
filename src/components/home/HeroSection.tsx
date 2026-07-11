@@ -11,7 +11,7 @@ export function HeroSection() {
         <img
           src={heroImage.url}
           alt="E and A Luxurious - Where Luxury Meets Spirituality"
-          className="absolute inset-0 w-full h-full object-cover object-center animate-editorial-scale"
+          className="absolute inset-0 w-full h-full object-cover object-top animate-editorial-scale"
         />
         {/* Cinematic gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/60" />
