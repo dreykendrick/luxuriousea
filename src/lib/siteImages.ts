@@ -40,6 +40,31 @@ function parseMaxBytes(maxFileSize: string): number {
   return num * multiplier;
 }
 
+// ---------------------------------------------------------------------------
+// Local cache helpers
+// We use localStorage (persists across tabs/refreshes) instead of sessionStorage
+// so the cache is always fresh: we write the new URL the moment the admin saves
+// an image, which means the next page refresh always loads the correct image
+// immediately with zero flash.
+// ---------------------------------------------------------------------------
+const CACHE_PREFIX = "site_img_v1_";
+
+export function setSiteImageCache(key: string, url: string): void {
+  try {
+    localStorage.setItem(`${CACHE_PREFIX}${key}`, url);
+  } catch {
+    // ignore quota errors
+  }
+}
+
+export function getSiteImageCache(key: string): string | null {
+  try {
+    return localStorage.getItem(`${CACHE_PREFIX}${key}`);
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Uploads a new image for an existing site_images row (identified by key),
  * then updates that row's url + updated_at. Never touches name/
@@ -71,22 +96,27 @@ export async function uploadSiteImage(row: SiteImageRow, file: File): Promise<st
     .eq("key", row.key);
   if (updateError) throw updateError;
 
+  // Write to local cache immediately so the NEXT page refresh shows this
+  // new URL right away — no flash of the old image.
+  setSiteImageCache(row.key, url);
+
   return url;
 }
 
 /**
- * Fetches the current URL for a site image slot, falling back to a default
- * until the row/upload exists.
+ * Returns the URL for a site image slot, with zero flash on refresh.
  *
- * The result is cached in sessionStorage so the correct image loads instantly
- * on every subsequent page visit within the same browser session — no flash of
- * the fallback while the DB round-trip completes.
+ * Strategy:
+ * 1. Read from localStorage immediately (written on every admin save) so the
+ *    correct image is available synchronously — before any network request.
+ * 2. Fetch from DB in the background to pick up any changes made in another
+ *    browser/device.
+ * 3. When the DB returns a DIFFERENT url, preload it with a hidden Image object
+ *    before calling setState, so the src swap is instant (image already in
+ *    browser memory) — no blank frame, no visible transition.
  */
 export function useSiteImage(key: string, fallback: string): string {
-  const cacheKey = `site_image_${key}`;
-  const cached = sessionStorage.getItem(cacheKey);
-
-  const [url, setUrl] = useState<string>(cached ?? fallback);
+  const [url, setUrl] = useState<string>(() => getSiteImageCache(key) ?? fallback);
 
   useEffect(() => {
     let cancelled = false;
@@ -94,17 +124,24 @@ export function useSiteImage(key: string, fallback: string): string {
       try {
         const found = await fetchSiteImage(key);
         if (!cancelled && found) {
-          sessionStorage.setItem(cacheKey, found);
-          setUrl(found);
+          // Always keep localStorage up-to-date
+          setSiteImageCache(key, found);
+
+          if (found === url) return; // already showing the right image
+
+          // Preload the new image before swapping so there is no blank frame
+          const img = new window.Image();
+          const swap = () => { if (!cancelled) setUrl(found); };
+          img.onload = swap;
+          img.onerror = swap; // swap even on error so we don't stay on stale
+          img.src = found;
         }
       } catch {
-        // keep fallback silently
+        // keep current url silently
       }
     })();
-    return () => {
-      cancelled = true;
-    };
-  }, [key, cacheKey]);
+    return () => { cancelled = true; };
+  }, [key]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return url;
 }
