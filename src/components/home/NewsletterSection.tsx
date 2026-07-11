@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { ArrowRight } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 export function NewsletterSection() {
   const [email, setEmail] = useState("");
@@ -13,13 +14,39 @@ export function NewsletterSection() {
     if (!email) return;
 
     setIsLoading(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    setIsLoading(false);
-    setEmail("");
-    toast.success("Welcome to E & A Luxurious", {
-      description: "You'll be the first to know about new collections.",
-    });
+    try {
+      // 1. Save email to the database
+      const { error: dbError } = await supabase
+        .from("newsletter_subscribers")
+        .insert({ email: email.trim().toLowerCase() });
+
+      if (dbError) {
+        // Unique constraint = already subscribed
+        if (dbError.code === "23505") {
+          toast.info("You're already subscribed!", {
+            description: "We'll keep sending you the latest updates.",
+          });
+          setEmail("");
+          return;
+        }
+        throw dbError;
+      }
+
+      // 2. Trigger welcome email via Edge Function (fire-and-forget)
+      void supabase.functions.invoke("send-welcome-email", {
+        body: { email: email.trim().toLowerCase() },
+      });
+
+      setEmail("");
+      toast.success("Welcome to E & A Luxurious ✦", {
+        description: "You'll be the first to know about new collections. Check your inbox!",
+      });
+    } catch (err) {
+      console.error("Newsletter subscribe error:", err);
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

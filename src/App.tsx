@@ -28,6 +28,7 @@ import AdminOrderDetail from "./pages/admin/AdminOrderDetail";
 import AdminCategories from "./pages/admin/AdminCategories";
 import AdminCustomers from "./pages/admin/AdminCustomers";
 import AdminImages from "./pages/admin/AdminImages";
+import AdminSubscribers from "./pages/admin/AdminSubscribers";
 
 
 const queryClient = new QueryClient();
@@ -63,6 +64,7 @@ const App = () => (
                 <Route path="categories" element={<AdminCategories />} />
                 <Route path="customers" element={<AdminCustomers />} />
                 <Route path="images" element={<AdminImages />} />
+                <Route path="subscribers" element={<AdminSubscribers />} />
 
               </Route>
 
