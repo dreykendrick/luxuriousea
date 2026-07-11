@@ -60,7 +60,11 @@ const About = () => {
               </div>
               <div className="order-1 lg:order-2 relative aspect-[4/5] overflow-hidden">
                 <img
+<<<<<<< Updated upstream
                   src={foundersImage.url}
+=======
+                  src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&h=1000&fit=crop&q=90"
+>>>>>>> Stashed changes
                   alt="Founders Emmanuel and Ainekisha"
                   className="w-full h-full object-cover"
                 />

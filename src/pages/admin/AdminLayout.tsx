@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { NavLink, Outlet, useLocation, useNavigate, Link } from "react-router-dom";
-import { LayoutDashboard, Package, ShoppingBag, LogOut, Home, Tags, Users } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingBag, LogOut, Home, Tags, Users, Image } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 
@@ -10,6 +10,7 @@ const nav = [
   { to: "/admin/categories", label: "Categories", icon: Tags },
   { to: "/admin/orders", label: "Orders", icon: ShoppingBag },
   { to: "/admin/customers", label: "Customers", icon: Users },
+  { to: "/admin/images", label: "Site Images", icon: Image },
 ];
 
 

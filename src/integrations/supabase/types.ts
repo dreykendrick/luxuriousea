@@ -44,6 +44,39 @@ export type Database = {
         }
         Relationships: []
       }
+      site_images: {
+        Row: {
+          id: string
+          key: string
+          name: string
+          url: string
+          recommended_aspect_ratio: string
+          max_file_size: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          key: string
+          name: string
+          url: string
+          recommended_aspect_ratio: string
+          max_file_size: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          key?: string
+          name?: string
+          url?: string
+          recommended_aspect_ratio?: string
+          max_file_size?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       order_items: {
         Row: {
           color: string | null
