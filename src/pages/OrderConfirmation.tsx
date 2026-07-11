@@ -159,7 +159,7 @@ const OrderConfirmation = () => {
                           <img
                             src={i.image_url}
                             alt={i.product_name}
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-contain"
                           />
                         </div>
                       )}

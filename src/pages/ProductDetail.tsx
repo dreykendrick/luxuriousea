@@ -164,7 +164,7 @@ const ProductDetail = () => {
                   <img
                     src={images[imgIdx].url}
                     alt={product.name}
-                    className="absolute inset-0 w-full h-full object-cover"
+                    className="absolute inset-0 w-full h-full object-contain"
                   />
                 )}
                 {images.length > 1 && (
@@ -194,7 +194,7 @@ const ProductDetail = () => {
                         i === imgIdx ? "opacity-100" : "opacity-50 hover:opacity-75"
                       }`}
                     >
-                      <img src={img.url} alt="" className="absolute inset-0 w-full h-full object-cover" />
+                      <img src={img.url} alt="" className="absolute inset-0 w-full h-full object-contain" />
                     </button>
                   ))}
                 </div>

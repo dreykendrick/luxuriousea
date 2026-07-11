@@ -218,7 +218,7 @@ const Shop = () => {
                           <img
                             src={product.product_images[0].url}
                             alt={product.name}
-                            className="absolute inset-0 w-full h-full object-cover"
+                            className="absolute inset-0 w-full h-full object-contain"
                           />
                         )}
                       </div>
