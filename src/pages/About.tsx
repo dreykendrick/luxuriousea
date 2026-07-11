@@ -2,9 +2,17 @@ import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
-import foundersImage from "@/assets/founders-couple.jpeg.asset.json";
+import { useSiteImage } from "@/lib/siteImages";
+
+const DEFAULT_ABOUT_HERO =
+  "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1920&h=1080&fit=crop";
+const DEFAULT_FOUNDERS_PHOTO =
+  "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&h=1000&fit=crop&q=90";
 
 const About = () => {
+  const aboutHero = useSiteImage("about_hero", DEFAULT_ABOUT_HERO);
+  const foundersPhoto = useSiteImage("about_founders", DEFAULT_FOUNDERS_PHOTO);
+
   return (
     <Layout>
       <div className="pt-20 lg:pt-24">
@@ -12,7 +20,7 @@ const About = () => {
         <section className="relative h-[60vh] lg:h-[70vh] flex items-center justify-center overflow-hidden">
           <div className="absolute inset-0">
             <img
-              src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1920&h=1080&fit=crop"
+              src={aboutHero}
               alt="E & A Luxurious brand"
               className="w-full h-full object-cover"
             />
@@ -60,11 +68,7 @@ const About = () => {
               </div>
               <div className="order-1 lg:order-2 relative aspect-[4/5] overflow-hidden">
                 <img
-<<<<<<< Updated upstream
-                  src={foundersImage.url}
-=======
-                  src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&h=1000&fit=crop&q=90"
->>>>>>> Stashed changes
+                  src={foundersPhoto}
                   alt="Founders Emmanuel and Ainekisha"
                   className="w-full h-full object-cover"
                 />
