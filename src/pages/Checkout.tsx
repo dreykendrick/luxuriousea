@@ -93,11 +93,21 @@ const Checkout = () => {
       const { error: itemsErr } = await supabase.from("order_items").insert(itemRows);
       if (itemsErr) throw itemsErr;
 
+      // Invoke Stripe Checkout Edge Function
+      const { data: stripeSession, error: stripeErr } = await supabase.functions.invoke(
+        "create-stripe-checkout",
+        {
+          body: { orderId: order.id, origin: window.location.origin },
+        }
+      );
+
+      if (stripeErr || !stripeSession?.url) {
+        throw new Error(stripeErr?.message || "Failed to create payment session");
+      }
+
       clear();
-      toast.success("Order placed", {
-        description: `Order ${order.order_number} received.`,
-      });
-      navigate(`/order/${order.order_number}?just_placed=1`);
+      // Redirect to Stripe Checkout page
+      window.location.href = stripeSession.url;
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Checkout failed";
       toast.error(msg);
