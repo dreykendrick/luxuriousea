@@ -377,7 +377,7 @@ const ProductDetail = () => {
                   <AccordionContent>
                     <div className="space-y-3 font-sans text-sm text-muted-foreground pb-4">
                       <p>Estimated delivery: 3–5 business days.</p>
-                      <p>Returns accepted within 30 days of delivery.</p>
+                      <p>All purchases are final. You cannot return the product once bought.</p>
                     </div>
                   </AccordionContent>
                 </AccordionItem>
