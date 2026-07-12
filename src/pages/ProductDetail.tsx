@@ -327,7 +327,7 @@ const ProductDetail = () => {
               <p className="font-sans text-xs text-muted-foreground border-t border-border pt-8 mb-10">
                 {product.is_preorder
                   ? "Pre-order secured. Ships when available — we'll notify you with tracking details."
-                  : "Complimentary shipping on orders over $150. Estimated delivery: 3–5 business days."}
+                  : "Estimated delivery: 3–5 business days."}
               </p>
 
               <Accordion type="single" collapsible className="border-t border-border">
@@ -376,7 +376,7 @@ const ProductDetail = () => {
                   </AccordionTrigger>
                   <AccordionContent>
                     <div className="space-y-3 font-sans text-sm text-muted-foreground pb-4">
-                      <p>Complimentary shipping on orders over $150. Estimated delivery: 3–5 business days.</p>
+                      <p>Estimated delivery: 3–5 business days.</p>
                       <p>Returns accepted within 30 days of delivery.</p>
                     </div>
                   </AccordionContent>
