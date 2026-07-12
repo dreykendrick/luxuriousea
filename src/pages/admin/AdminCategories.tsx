@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,6 +25,7 @@ const AdminCategories = () => {
   const [cats, setCats] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const newRowRef = useRef<HTMLDivElement | null>(null);
 
   async function load() {
     setLoading(true);
@@ -40,6 +41,16 @@ const AdminCategories = () => {
   useEffect(() => {
     void load();
   }, []);
+
+  // Scroll to the new blank row whenever it appears
+  useEffect(() => {
+    if (newRowRef.current) {
+      newRowRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+      // Focus the name input inside the new row
+      const input = newRowRef.current.querySelector("input");
+      if (input) (input as HTMLInputElement).focus();
+    }
+  }, [cats.length]);
 
   function update(idx: number, patch: Partial<Category>) {
     const n = [...cats];
@@ -75,16 +86,30 @@ const AdminCategories = () => {
   }
 
   async function saveAll() {
+    // Warn if any new category has no name
+    const emptyNew = cats.filter((c) => c._isNew && !c.name.trim());
+    if (emptyNew.length > 0) {
+      toast.error("Please enter a name for every new category before saving.");
+      // Scroll to the first empty new row
+      newRowRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+
+    const dirty = cats.filter((c) => c._dirty && c.name.trim());
+    if (dirty.length === 0) {
+      toast.info("No changes to save.");
+      return;
+    }
+
     setSaving(true);
     try {
-      const dirty = cats.filter((c) => c._dirty && c.name);
       for (const c of dirty) {
-        const slug = c.slug || slugify(c.name);
+        const slug = c.slug.trim() || slugify(c.name);
         if (c._isNew) {
           const { error } = await supabase.from("categories").insert({
-            name: c.name,
+            name: c.name.trim(),
             slug,
-            description: c.description || null,
+            description: c.description?.trim() || null,
             display_order: c.display_order,
           });
           if (error) throw error;
@@ -92,16 +117,16 @@ const AdminCategories = () => {
           const { error } = await supabase
             .from("categories")
             .update({
-              name: c.name,
+              name: c.name.trim(),
               slug,
-              description: c.description || null,
+              description: c.description?.trim() || null,
               display_order: c.display_order,
             })
             .eq("id", c.id);
           if (error) throw error;
         }
       }
-      toast.success("Categories saved");
+      toast.success(`${dirty.length} categor${dirty.length === 1 ? "y" : "ies"} saved`);
       void load();
     } catch (err) {
       // Supabase errors are NOT instanceof Error — extract .message explicitly
@@ -114,6 +139,8 @@ const AdminCategories = () => {
       setSaving(false);
     }
   }
+
+  const dirtyCount = cats.filter((c) => c._dirty && c.name.trim()).length;
 
   return (
     <div className="max-w-4xl">
@@ -137,7 +164,7 @@ const AdminCategories = () => {
             className="bg-foreground hover:bg-foreground/90 text-background h-11 px-6 font-sans text-xs tracking-ultra uppercase"
           >
             <Save className="h-4 w-4 mr-2" />
-            {saving ? "Saving..." : "Save"}
+            {saving ? "Saving..." : dirtyCount > 0 ? `Save (${dirtyCount})` : "Save"}
           </Button>
         </div>
       </div>
@@ -152,20 +179,34 @@ const AdminCategories = () => {
       ) : (
         <div className="space-y-4">
           {cats.map((c, idx) => (
-            <div key={c.id} className="border border-border p-6 space-y-4">
+            <div
+              key={c.id}
+              ref={c._isNew && idx === cats.length - 1 ? newRowRef : null}
+              className={`border p-6 space-y-4 transition-colors ${
+                c._isNew ? "border-foreground/30 bg-secondary/20" : "border-border"
+              }`}
+            >
+              {c._isNew && (
+                <p className="font-sans text-xs text-muted-foreground uppercase tracking-wide">
+                  ✦ New category — fill in the details then click Save
+                </p>
+              )}
               <div className="grid sm:grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <Label className="font-sans text-xs tracking-wide uppercase">Name</Label>
+                  <Label className="font-sans text-xs tracking-wide uppercase">
+                    Name <span className="text-destructive">*</span>
+                  </Label>
                   <Input
                     value={c.name}
                     onChange={(e) => update(idx, { name: e.target.value })}
-                    className="h-11"
+                    className={`h-11 ${c._isNew && !c.name ? "border-destructive/50" : ""}`}
+                    placeholder="e.g. T-Shirts"
                   />
                 </div>
                 <div className="space-y-2">
                   <Label className="font-sans text-xs tracking-wide uppercase">Slug</Label>
                   <Input
-                    placeholder={slugify(c.name)}
+                    placeholder={c.name ? slugify(c.name) : "auto-generated"}
                     value={c.slug}
                     onChange={(e) => update(idx, { slug: e.target.value })}
                     className="h-11"
@@ -197,7 +238,7 @@ const AdminCategories = () => {
                   className="text-destructive hover:text-destructive"
                 >
                   <Trash2 className="h-4 w-4 mr-1" />
-                  Delete
+                  {c._isNew ? "Discard" : "Delete"}
                 </Button>
               </div>
             </div>
