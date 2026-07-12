@@ -69,7 +69,7 @@ const AdminCategories = () => {
       return;
     }
     const { error } = await supabase.from("categories").delete().eq("id", c.id);
-    if (error) return toast.error(error.message);
+    if (error) return toast.error("Delete failed: " + error.message);
     toast.success("Category deleted");
     void load();
   }
@@ -104,7 +104,12 @@ const AdminCategories = () => {
       toast.success("Categories saved");
       void load();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Save failed");
+      // Supabase errors are NOT instanceof Error — extract .message explicitly
+      const msg =
+        err instanceof Error
+          ? err.message
+          : (err as { message?: string })?.message ?? "Save failed";
+      toast.error("Save failed: " + msg);
     } finally {
       setSaving(false);
     }
