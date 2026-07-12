@@ -29,6 +29,10 @@ import AdminCategories from "./pages/admin/AdminCategories";
 import AdminCustomers from "./pages/admin/AdminCustomers";
 import AdminImages from "./pages/admin/AdminImages";
 import AdminSubscribers from "./pages/admin/AdminSubscribers";
+import ShippingReturns from "./pages/ShippingReturns";
+import FAQ from "./pages/FAQ";
+import Terms from "./pages/Terms";
+import Privacy from "./pages/Privacy";
 
 
 const queryClient = new QueryClient();
@@ -53,6 +57,10 @@ const App = () => (
               <Route path="/track-order" element={<TrackOrder />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/account" element={<Account />} />
+              <Route path="/shipping-returns" element={<ShippingReturns />} />
+              <Route path="/faq" element={<FAQ />} />
+              <Route path="/terms" element={<Terms />} />
+              <Route path="/privacy" element={<Privacy />} />
 
               <Route path="/admin" element={<AdminLayout />}>
                 <Route index element={<AdminDashboard />} />
