@@ -33,6 +33,7 @@ import ShippingReturns from "./pages/ShippingReturns";
 import FAQ from "./pages/FAQ";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
+import ScrollToTop from "./components/layout/ScrollToTop";
 
 
 const queryClient = new QueryClient();
@@ -43,6 +44,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <ScrollToTop />
         <AuthProvider>
           <CartProvider>
             <Routes>
