@@ -76,17 +76,18 @@ const ProductDetail = () => {
 
   const stockLabel = useMemo(() => {
     if (!selectedSize) return null;
-    if (currentStock === 0) return { text: "Currently Unavailable", subtle: true };
-    if (currentStock <= 3) return { text: `Only ${currentStock} remaining`, subtle: false };
-    return { text: "Available", subtle: true };
-  }, [selectedSize, currentStock]);
+    if (product?.is_preorder) return { text: "Pre-order Available", colorClass: "text-amber-600 dark:text-amber-400" };
+    if (currentStock === 0) return { text: "No stock", colorClass: "text-destructive font-medium" };
+    if (currentStock < 2) return { text: "Low stock", colorClass: "text-amber-600 dark:text-amber-400 font-medium" };
+    return { text: "Available", colorClass: "text-muted-foreground" };
+  }, [selectedSize, currentStock, product?.is_preorder]);
 
   function handleAdd() {
     if (!product) return;
     if (colors.length > 0 && !selectedColor) return toast.error("Please select a color");
     if (availableSizes.length > 0 && !selectedSize) return toast.error("Please select a size");
     if (!currentVariant) return toast.error("Selection unavailable");
-    if (currentStock === 0) return toast.error("Currently unavailable");
+    if (currentStock === 0 && !product.is_preorder) return toast.error("No stock available");
     addItem(
       {
         variantId: currentVariant.id,
@@ -273,7 +274,7 @@ const ProductDetail = () => {
                     </SelectContent>
                   </Select>
                   {stockLabel && (
-                    <p className={`font-sans text-xs mt-3 ${stockLabel.subtle ? "text-muted-foreground" : "text-foreground"}`}>
+                    <p className={`font-sans text-xs mt-3 ${stockLabel.colorClass}`}>
                       {stockLabel.text}
                     </p>
                   )}
@@ -311,10 +312,10 @@ const ProductDetail = () => {
                       ? "bg-amber-800 hover:bg-amber-700 text-white"
                       : "bg-foreground hover:bg-foreground/90 text-background"
                   }`}
-                  disabled={selectedSize !== null && currentStock === 0}
+                  disabled={selectedSize !== null && currentStock === 0 && !product.is_preorder}
                 >
-                  {selectedSize !== null && currentStock === 0
-                    ? "Unavailable"
+                  {selectedSize !== null && currentStock === 0 && !product.is_preorder
+                    ? "No Stock"
                     : product.is_preorder
                     ? "Pre-order Now"
                     : "Add to Bag"}
