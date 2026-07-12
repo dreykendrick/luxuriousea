@@ -33,6 +33,7 @@ export interface Product {
   is_featured: boolean;
   is_best_seller: boolean;
   is_new: boolean;
+  is_preorder: boolean;
   category?: { slug: string; name: string } | null;
   product_images?: ProductImage[];
   product_variants?: ProductVariant[];
@@ -49,7 +50,7 @@ export async function fetchProducts(opts?: {
     .from("products")
     .select(
       `id, slug, name, description, meaning, fabric, fit, care, base_price,
-       category_id, is_active, is_featured, is_best_seller, is_new,
+       category_id, is_active, is_featured, is_best_seller, is_new, is_preorder,
        category:categories(slug, name),
        product_images(id, url, alt_text, display_order)`
     )
@@ -79,7 +80,7 @@ export async function fetchProductBySlug(slug: string): Promise<Product | null> 
     .from("products")
     .select(
       `id, slug, name, description, meaning, fabric, fit, care, base_price,
-       category_id, is_active, is_featured, is_best_seller, is_new,
+       category_id, is_active, is_featured, is_best_seller, is_new, is_preorder,
        category:categories(slug, name),
        product_images(id, url, alt_text, display_order),
        product_variants(id, size, color, color_hex, sku, price_override, stock, is_active)`

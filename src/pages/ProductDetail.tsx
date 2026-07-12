@@ -209,6 +209,11 @@ const ProductDetail = () => {
                     {product.category.name}
                   </p>
                 )}
+                {product.is_preorder && (
+                  <span className="inline-block font-sans text-[10px] tracking-widest uppercase bg-amber-800/90 text-white px-3 py-1 mb-4">
+                    ✦ Pre-order
+                  </span>
+                )}
                 <h1
                   className="font-serif text-3xl lg:text-4xl xl:text-5xl font-light mb-5"
                   style={{ letterSpacing: "-0.02em" }}
@@ -301,10 +306,18 @@ const ProductDetail = () => {
               <div className="flex gap-4 mb-10">
                 <Button
                   onClick={handleAdd}
-                  className="flex-1 h-14 bg-foreground hover:bg-foreground/90 text-background text-xs tracking-ultra uppercase font-sans font-normal"
+                  className={`flex-1 h-14 text-xs tracking-ultra uppercase font-sans font-normal transition-all duration-300 ${
+                    product.is_preorder
+                      ? "bg-amber-800 hover:bg-amber-700 text-white"
+                      : "bg-foreground hover:bg-foreground/90 text-background"
+                  }`}
                   disabled={selectedSize !== null && currentStock === 0}
                 >
-                  {selectedSize !== null && currentStock === 0 ? "Unavailable" : "Add to Bag"}
+                  {selectedSize !== null && currentStock === 0
+                    ? "Unavailable"
+                    : product.is_preorder
+                    ? "Pre-order Now"
+                    : "Add to Bag"}
                 </Button>
                 <Button variant="outline" size="icon" className="h-14 w-14 border-border hover:bg-secondary">
                   <Heart className="h-5 w-5" />
@@ -312,7 +325,9 @@ const ProductDetail = () => {
               </div>
 
               <p className="font-sans text-xs text-muted-foreground border-t border-border pt-8 mb-10">
-                Complimentary shipping on orders over $150. Estimated delivery: 3–5 business days.
+                {product.is_preorder
+                  ? "Pre-order secured. Ships when available — we'll notify you with tracking details."
+                  : "Complimentary shipping on orders over $150. Estimated delivery: 3–5 business days."}
               </p>
 
               <Accordion type="single" collapsible className="border-t border-border">

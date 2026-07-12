@@ -157,6 +157,7 @@ CREATE TABLE public.products (
   is_featured BOOLEAN NOT NULL DEFAULT false,
   is_best_seller BOOLEAN NOT NULL DEFAULT false,
   is_new BOOLEAN NOT NULL DEFAULT false,
+  is_preorder BOOLEAN NOT NULL DEFAULT false,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );

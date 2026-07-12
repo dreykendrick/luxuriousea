@@ -84,6 +84,7 @@ const AdminProductEdit = () => {
     is_new: false,
     is_featured: false,
     is_best_seller: false,
+    is_preorder: false,
   });
   const [variants, setVariants] = useState<VariantForm[]>([]);
   const [images, setImages] = useState<ImageForm[]>([]);
@@ -138,6 +139,7 @@ const AdminProductEdit = () => {
             is_new: data.is_new,
             is_featured: data.is_featured,
             is_best_seller: data.is_best_seller,
+            is_preorder: data.is_preorder ?? false,
           });
           setVariants(
             (data.product_variants ?? []).map((v: any) => ({
@@ -379,12 +381,13 @@ const AdminProductEdit = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-border">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 pt-4 border-t border-border">
             {[
               { key: "is_active", label: "Live on Site" },
               { key: "is_new", label: "New Arrival" },
               { key: "is_featured", label: "Featured" },
               { key: "is_best_seller", label: "Best Seller" },
+              { key: "is_preorder", label: "Pre-order" },
             ].map((f) => (
               <label key={f.key} className="flex items-center gap-3 cursor-pointer">
                 <Switch

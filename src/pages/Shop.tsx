@@ -221,13 +221,21 @@ const Shop = () => {
                             className="absolute inset-0 w-full h-full object-contain"
                           />
                         )}
+                        {product.is_preorder && (
+                          <div className="absolute top-3 left-3 bg-amber-800/90 text-white font-sans text-[9px] tracking-widest uppercase px-2.5 py-1">
+                            Pre-order
+                          </div>
+                        )}
                       </div>
-                      <div className="space-y-2">
+                      <div className="space-y-1">
                         <h3 className="font-serif text-base lg:text-lg font-light group-hover:text-muted-foreground transition-colors duration-500">
                           {product.name}
                         </h3>
                         <p className="font-sans text-sm text-muted-foreground">
                           ${Number(product.base_price).toFixed(0)}
+                          {product.is_preorder && (
+                            <span className="ml-2 text-amber-700 dark:text-amber-500 text-[10px] tracking-wide uppercase">· Pre-order</span>
+                          )}
                         </p>
                       </div>
                     </Link>
