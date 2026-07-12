@@ -122,7 +122,8 @@ CREATE TABLE public.categories (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-GRANT SELECT ON public.categories TO anon, authenticated;
+GRANT SELECT ON public.categories TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.categories TO authenticated;
 GRANT ALL ON public.categories TO service_role;
 
 ALTER TABLE public.categories ENABLE ROW LEVEL SECURITY;
