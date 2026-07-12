@@ -74,20 +74,20 @@ const ProductDetail = () => {
   const currentStock = currentVariant?.stock ?? 0;
   const price = currentVariant?.price_override ?? product?.base_price ?? 0;
 
+  const isPreorderMode = !!product?.is_preorder || (selectedSize !== null && currentStock === 0);
+
   const stockLabel = useMemo(() => {
     if (!selectedSize) return null;
-    if (product?.is_preorder) return { text: "Pre-order Available", colorClass: "text-amber-600 dark:text-amber-400" };
-    if (currentStock === 0) return { text: "No stock", colorClass: "text-destructive font-medium" };
+    if (isPreorderMode) return { text: "Pre-order Available", colorClass: "text-amber-600 dark:text-amber-400" };
     if (currentStock < 2) return { text: "Low stock", colorClass: "text-amber-600 dark:text-amber-400 font-medium" };
     return { text: "Available", colorClass: "text-muted-foreground" };
-  }, [selectedSize, currentStock, product?.is_preorder]);
+  }, [selectedSize, currentStock, isPreorderMode]);
 
   function handleAdd() {
     if (!product) return;
     if (colors.length > 0 && !selectedColor) return toast.error("Please select a color");
     if (availableSizes.length > 0 && !selectedSize) return toast.error("Please select a size");
     if (!currentVariant) return toast.error("Selection unavailable");
-    if (currentStock === 0 && !product.is_preorder) return toast.error("No stock available");
     addItem(
       {
         variantId: currentVariant.id,
@@ -101,7 +101,7 @@ const ProductDetail = () => {
       },
       quantity
     );
-    toast.success("Added to bag", {
+    toast.success(isPreorderMode ? "Pre-order added to bag" : "Added to bag", {
       description: `${product.name}${
         currentVariant.color || currentVariant.size
           ? " — " + [currentVariant.color, currentVariant.size].filter(Boolean).join(", ")
@@ -308,17 +308,13 @@ const ProductDetail = () => {
                 <Button
                   onClick={handleAdd}
                   className={`flex-1 h-14 text-xs tracking-ultra uppercase font-sans font-normal transition-all duration-300 ${
-                    product.is_preorder
+                    isPreorderMode
                       ? "bg-amber-800 hover:bg-amber-700 text-white"
                       : "bg-foreground hover:bg-foreground/90 text-background"
                   }`}
-                  disabled={selectedSize !== null && currentStock === 0 && !product.is_preorder}
+                  disabled={false}
                 >
-                  {selectedSize !== null && currentStock === 0 && !product.is_preorder
-                    ? "No Stock"
-                    : product.is_preorder
-                    ? "Pre-order Now"
-                    : "Add to Bag"}
+                  {isPreorderMode ? "Pre-order Now" : "Add to Bag"}
                 </Button>
                 <Button variant="outline" size="icon" className="h-14 w-14 border-border hover:bg-secondary">
                   <Heart className="h-5 w-5" />
@@ -326,7 +322,7 @@ const ProductDetail = () => {
               </div>
 
               <p className="font-sans text-xs text-muted-foreground border-t border-border pt-8 mb-10">
-                {product.is_preorder
+                {isPreorderMode
                   ? "Pre-order secured. Ships when available — we'll notify you with tracking details."
                   : "Estimated delivery: 3–5 business days."}
               </p>
