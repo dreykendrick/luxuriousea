@@ -102,7 +102,7 @@ serve(async (req) => {
       payment_method_types: ["card"],
       line_items: lineItems,
       mode: "payment",
-      success_url: `${origin}/order/${order.order_number}?just_placed=1`,
+      success_url: `${origin}/order/${order.order_number}?session_id={CHECKOUT_SESSION_ID}&just_placed=1`,
       cancel_url: `${origin}/checkout`,
       customer_email: order.email,
       metadata: {

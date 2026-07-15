@@ -45,12 +45,34 @@ const OrderConfirmation = () => {
   const { orderNumber } = useParams();
   const [searchParams] = useSearchParams();
   const justPlaced = searchParams.get("just_placed") === "1";
+  const sessionId = searchParams.get("session_id");
   const [order, setOrder] = useState<OrderDetail | null>(null);
   const [loading, setLoading] = useState(true);
+  const [verifying, setVerifying] = useState(!!sessionId);
+  const [verificationError, setVerificationError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!orderNumber) return;
     void (async () => {
+      if (sessionId) {
+        setVerifying(true);
+        try {
+          const { data, error } = await supabase.functions.invoke("verify-stripe-payment", {
+            body: { sessionId, orderNumber },
+          });
+          if (error || !data?.success) {
+            throw new Error(error?.message || data?.error || "Verification failed");
+          }
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : "Payment verification failed";
+          setVerificationError(msg);
+          setVerifying(false);
+          setLoading(false);
+          return;
+        }
+        setVerifying(false);
+      }
+
       const { data } = await supabase
         .from("orders")
         .select(
@@ -63,13 +85,27 @@ const OrderConfirmation = () => {
       setOrder(data as any);
       setLoading(false);
     })();
-  }, [orderNumber]);
+  }, [orderNumber, sessionId]);
 
   return (
     <Layout>
       <div className="pt-32 lg:pt-40 pb-24 min-h-screen">
         <div className="container mx-auto px-6 lg:px-8 max-w-3xl">
-          {loading ? (
+          {verifying ? (
+            <div className="text-center py-20">
+              <div className="animate-spin h-8 w-8 border-2 border-foreground border-t-transparent rounded-full mx-auto mb-6" />
+              <h1 className="font-serif text-2xl font-light mb-2">Verifying Payment</h1>
+              <p className="font-sans text-sm text-muted-foreground">Please do not close or refresh this page.</p>
+            </div>
+          ) : verificationError ? (
+            <div className="text-center py-20">
+              <h1 className="font-serif text-2xl font-light text-destructive mb-4">Payment Verification Failed</h1>
+              <p className="font-sans text-sm text-muted-foreground mb-8 max-w-md mx-auto">{verificationError}</p>
+              <Button asChild variant="outline">
+                <Link to="/contact">Contact Support</Link>
+              </Button>
+            </div>
+          ) : loading ? (
             <p className="text-center text-muted-foreground">Loading...</p>
           ) : !order ? (
             <div className="text-center py-16">
