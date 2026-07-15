@@ -75,7 +75,7 @@ const Checkout = () => {
         })
         .select("id, order_number")
         .single();
-      if (orderErr) throw orderErr;
+      if (orderErr) throw new Error(`Order creation failed: ${orderErr.message}`);
 
       // Create order items
       const itemRows = items.map((i) => ({
@@ -91,7 +91,7 @@ const Checkout = () => {
         image_url: i.image,
       }));
       const { error: itemsErr } = await supabase.from("order_items").insert(itemRows);
-      if (itemsErr) throw itemsErr;
+      if (itemsErr) throw new Error(`Order items failed: ${itemsErr.message}`);
 
       // Invoke Stripe Checkout Edge Function
       const { data: stripeSession, error: stripeErr } = await supabase.functions.invoke(
@@ -101,15 +101,15 @@ const Checkout = () => {
         }
       );
 
-      if (stripeErr || !stripeSession?.url) {
-        throw new Error(stripeErr?.message || "Failed to create payment session");
-      }
+      if (stripeErr) throw new Error(`Stripe error: ${stripeErr.message}`);
+      if (!stripeSession?.url) throw new Error("No payment URL returned from Stripe");
 
       clear();
       // Redirect to Stripe Checkout page
       window.location.href = stripeSession.url;
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Checkout failed";
+      const msg = err instanceof Error ? err.message : JSON.stringify(err);
+      console.error("Checkout error:", err);
       toast.error(msg);
     } finally {
       setBusy(false);
