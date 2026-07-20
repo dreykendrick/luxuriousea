@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useSiteImage } from "@/lib/siteImages";
 
 const DEFAULT_HERO_IMAGE =
-  "https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=1920&h=1280&fit=crop&q=90";
+  "https://ujplkxpaswmrtacwhywo.supabase.co/storage/v1/object/public/site-images/home_hero-f2a95594-68c9-404e-93cc-f772911ba194.png";
 
 export function HeroSection() {
   const heroImage = useSiteImage("home_hero", DEFAULT_HERO_IMAGE);
@@ -16,6 +16,8 @@ export function HeroSection() {
           src={heroImage}
           alt="E and A Luxurious - Where Luxury Meets Spirituality"
           className="absolute inset-0 w-full h-full object-cover object-center animate-editorial-scale"
+          fetchPriority="high"
+          decoding="async"
         />
         {/* Cinematic gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/60" />
